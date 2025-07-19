@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: motel-postgres
+    environment:
+      POSTGRES_USER: moteluser
+      POSTGRES_PASSWORD: motelpass
+      POSTGRES_DB: moteldb
+    ports:
+      - "5432:5432"
+    volumes:
+      - motel_pgdata:/var/lib/postgresql/data
+    networks: # Added this section
+      - motel-network # Ensure postgres is on the same network
+
+  motel-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: motel-springboot
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/moteldb
+      SPRING_DATASOURCE_USERNAME: moteluser
+      SPRING_DATASOURCE_PASSWORD: motelpass
+    networks:
+      - motel-network
+
+volumes:
+  motel_pgdata:
+
+networks:
+  motel-network:
