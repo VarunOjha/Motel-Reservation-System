@@ -36,18 +36,18 @@ public class MotelChainController {
         return new ResponseEntity<>(createdMotelChain, HttpStatus.CREATED);
     }
 
-    // @PutMapping("/{id}")
-    // public ResponseEntity<MotelChain> updateMotelChain(@PathVariable UUID id, @RequestBody MotelChain motelChain) {
-    //     MotelChain updatedMotelChain = motelChainService.updateMotelChain(id, motelChain);
-    //     return updatedMotelChain != null ? new ResponseEntity<>(updatedMotelChain, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    // }
+    @PutMapping("/{id}")
+    public ResponseEntity<MotelChain> updateMotelChain(@PathVariable UUID id, @RequestBody MotelChain motelChain) {
+        MotelChain updatedMotelChain = motelChainService.updateMotelChain(id, motelChain);
+        return updatedMotelChain != null ? new ResponseEntity<>(updatedMotelChain, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
-    // @DeleteMapping("/{id}")
-    // public ResponseEntity<Void> deleteMotelChain(@PathVariable UUID id) {
-    //     if (motelChainService.deleteMotelChain(id)) {
-    //         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    //     } else {
-    //         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    //     }
-    // }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMotelChain(@PathVariable UUID id) {
+        if (motelChainService.deleteMotelChain(id)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }

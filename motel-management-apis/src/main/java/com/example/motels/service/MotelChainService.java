@@ -31,18 +31,25 @@ public class MotelChainService {
         return motelChainRepository.save(motelChain);
     }
 
-    // public MotelChain updateMotelChain(UUID motelChainId, MotelChain motelChainDetails) {
-    //     MotelChain motelChain = motelChainRepository.findById(motelChainId)
-    //             .orElseThrow(() -> new RuntimeException("MotelChain not found"));
-    //     motelChain.setMotelChainName(motelChainDetails.getMotelChainName());
-    //     motelChain.setDisplayName(motelChainDetails.getDisplayName());
-    //     motelChain.setState(motelChainDetails.getState());
-    //     motelChain.setPincode(motelChainDetails.getPincode());
-        
-    //     return motelChainRepository.save(motelChain);
-    // }
+    public MotelChain updateMotelChain(UUID motelChainId, MotelChain motelChainDetails) {
+        MotelChain motelChain = motelChainRepository.findById(motelChainId)
+                .orElseThrow(() -> new RuntimeException("MotelChain not found"));
+        motelChain.setMotelChainName(motelChainDetails.getMotelChainName());
+        motelChain.setDisplayName(motelChainDetails.getDisplayName());
+        motelChain.setState(motelChainDetails.getState());
+        motelChain.setPincode(motelChainDetails.getPincode());
 
-    // public void deleteMotelChain(UUID motelChainId) {
-    //     motelChainRepository.deleteById(motelChainId);
-    // }
+        // Update newly added properties
+        motelChain.setAddress(motelChainDetails.getAddress());
+        
+        return motelChainRepository.save(motelChain);
+    }
+
+    public Boolean deleteMotelChain(UUID motelChainId) {
+        if (!motelChainRepository.existsById(motelChainId)) {
+            return false;
+        }
+        motelChainRepository.deleteById(motelChainId);
+        return true;
+    }
 }
