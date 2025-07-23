@@ -38,9 +38,11 @@ public class MotelChainService {
         motelChain.setDisplayName(motelChainDetails.getDisplayName());
         motelChain.setState(motelChainDetails.getState());
         motelChain.setPincode(motelChainDetails.getPincode());
+        motelChain.setStatus(motelChainDetails.getStatus());
 
         // Update newly added properties
         motelChain.setAddress(motelChainDetails.getAddress());
+        motelChain.setContactInfo(motelChainDetails.getContactInfo());
         
         return motelChainRepository.save(motelChain);
     }
