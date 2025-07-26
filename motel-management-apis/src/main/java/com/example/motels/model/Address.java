@@ -14,12 +14,4 @@ public class Address {
     private String landmark;
     private String addressName;
     private String status;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
-    private LocalDateTime deletedAt;
 }

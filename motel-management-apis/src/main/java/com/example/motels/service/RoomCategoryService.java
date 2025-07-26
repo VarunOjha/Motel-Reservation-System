@@ -21,7 +21,7 @@ public class RoomCategoryService {
     }
 
     public Optional<RoomCategory> getRoomCategoryById(UUID motelChainId, UUID motelId, UUID roomCategoryId) {
-        return roomCategoryRepository.findByIdAndMotelChainIdAndMotelId(roomCategoryId, motelChainId, motelId);
+        return roomCategoryRepository.findByMotelRoomCategoryIdAndMotelChainIdAndMotelId(roomCategoryId, motelChainId, motelId);
     }
 
     public RoomCategory createRoomCategory(UUID motelChainId, UUID motelId, RoomCategory roomCategory) {
@@ -31,7 +31,7 @@ public class RoomCategoryService {
     }
 
     public RoomCategory updateRoomCategory(UUID motelChainId, UUID motelId, UUID roomCategoryId, RoomCategory roomCategory) {
-        if (roomCategoryRepository.existsByIdAndMotelChainIdAndMotelId(roomCategoryId, motelChainId, motelId)) {
+        if (roomCategoryRepository.existsByMotelRoomCategoryIdAndMotelChainIdAndMotelId(roomCategoryId, motelChainId, motelId)) {
             roomCategory.setMotelRoomCategoryId(roomCategoryId);
             roomCategory.setMotelChainId(motelChainId);
             roomCategory.setMotelId(motelId);
@@ -41,7 +41,7 @@ public class RoomCategoryService {
     }
 
     public boolean deleteRoomCategory(UUID motelChainId, UUID motelId, UUID roomCategoryId) {
-        if (roomCategoryRepository.existsByIdAndMotelChainIdAndMotelId(roomCategoryId, motelChainId, motelId)) {
+        if (roomCategoryRepository.existsByMotelRoomCategoryIdAndMotelChainIdAndMotelId(roomCategoryId, motelChainId, motelId)) {
             roomCategoryRepository.deleteById(roomCategoryId);
             return true;
         }
