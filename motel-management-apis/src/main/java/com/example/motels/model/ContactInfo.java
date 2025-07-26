@@ -8,7 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import lombok.Data;
 
 @Data
-public class MotelChainContactInfo {
+public class ContactInfo {
     private String phoneNumber;
     private String email;
     private String contactName;

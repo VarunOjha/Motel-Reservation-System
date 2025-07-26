@@ -1,11 +1,5 @@
 package com.example.motels.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,19 +8,21 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.Data;
 
 @Data
 @Entity
-public class MotelChain {
-
+public class Motel {
+    private UUID motelChainId;
+    
     @Id
     @GeneratedValue
-    private UUID motelChainId;
-
-    private String motelChainName;
-    private String displayName;
-    private String state;
-    private String pincode;
+    private UUID motelId;
+    private String motelName;
     private String status;
 
     @JdbcTypeCode(SqlTypes.JSON) 
@@ -44,5 +40,4 @@ public class MotelChain {
     private LocalDateTime updatedAt;
 
     private LocalDateTime deletedAt;
-
 }
