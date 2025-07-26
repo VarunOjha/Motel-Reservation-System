@@ -6,71 +6,65 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"time"
 )
 
 // PostMotelChains reads JSON file, sends POST requests to given apiEndpoint,
 // extracts the values at jsonKey (like "motelChainId") from response, and returns them.
-func PostMotelChains(apiEndpoint string, jsonPath string, jsonKey string) ([]string, error) {
-	// Read JSON file
-	jsonFile, err := os.ReadFile(jsonPath)
-	if err != nil {
-		return nil, fmt.Errorf("error reading file: %v", err)
-	}
 
-	var motels []MotelChain
-	err = json.Unmarshal(jsonFile, &motels)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing JSON: %v", err)
-	}
+func Post(apiEndpoint string, jsonData []byte) []byte {
 
 	client := &http.Client{Timeout: 10 * time.Second}
-	var results []string
 
-	for i, motel := range motels {
-		jsonData, err := json.Marshal(motel)
-		if err != nil {
-			fmt.Printf("Error marshalling entry %d: %v\n", i+1, err)
-			continue
-		}
+	req, err := http.NewRequest("POST", apiEndpoint, bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Printf("Error creating request for entry: %v\n", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
 
-		req, err := http.NewRequest("POST", apiEndpoint, bytes.NewBuffer(jsonData))
-		if err != nil {
-			fmt.Printf("Error creating request for entry %d: %v\n", i+1, err)
-			continue
-		}
-		req.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("HTTP error for entry: %v\n", err)
+	}
+	defer resp.Body.Close()
 
-		resp, err := client.Do(req)
-		if err != nil {
-			fmt.Printf("HTTP error for entry %d: %v\n", i+1, err)
-			continue
-		}
-		defer resp.Body.Close()
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("Error reading response body for entry: %v\n", err)
+	}
 
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Printf("Error reading response body for entry %d: %v\n", i+1, err)
-			continue
-		}
+	// Print for debug
+	fmt.Printf("Response for motel:\nStatus: %s\nBody:\n%s\n\n", resp.Status, string(bodyBytes))
+	return bodyBytes
+}
 
-		// Print for debug
-		fmt.Printf("Response for motel %d [%s]:\nStatus: %s\nBody:\n%s\n\n",
-			i+1, motel.MotelChainName, resp.Status, string(bodyBytes))
+func GetMotelChainIds(apiURL string) ([]string, error) {
+	resp, err := http.Get(apiURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send GET request: %v", err)
+	}
+	defer resp.Body.Close()
 
-		var response map[string]interface{}
-		if err := json.Unmarshal(bodyBytes, &response); err != nil {
-			fmt.Printf("Error parsing response JSON for entry %d: %v\n", i+1, err)
-			continue
-		}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
 
-		if val, ok := response[jsonKey]; ok {
-			if str, isStr := val.(string); isStr {
-				results = append(results, str)
-			}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	var motels []MotelChainMinimal
+	if err := json.Unmarshal(body, &motels); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON response: %v", err)
+	}
+
+	var ids []string
+	for _, motel := range motels {
+		if motel.MotelChainId != "" {
+			ids = append(ids, motel.MotelChainId)
 		}
 	}
 
-	return results, nil
+	return ids, nil
 }

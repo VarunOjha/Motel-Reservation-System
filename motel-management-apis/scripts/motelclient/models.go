@@ -28,3 +28,8 @@ type MotelChain struct {
 	Address        Address     `json:"address"`
 	ContactInfo    ContactInfo `json:"contactInfo"`
 }
+
+// MotelChainMinimal holds only the field we want from the API response
+type MotelChainMinimal struct {
+	MotelChainId string `json:"motelChainId"`
+}

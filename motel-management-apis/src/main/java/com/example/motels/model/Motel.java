@@ -23,7 +23,10 @@ public class Motel {
     @GeneratedValue
     private UUID motelId;
     private String motelName;
+    private String displayName;
     private String status;
+    private String pincode;
+    private String state;
 
     @JdbcTypeCode(SqlTypes.JSON) 
     @Column(columnDefinition = "jsonb")
