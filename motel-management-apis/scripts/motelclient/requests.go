@@ -9,9 +9,6 @@ import (
 	"time"
 )
 
-// PostMotelChains reads JSON file, sends POST requests to given apiEndpoint,
-// extracts the values at jsonKey (like "motelChainId") from response, and returns them.
-
 func Post(apiEndpoint string, jsonData []byte) []byte {
 
 	client := &http.Client{Timeout: 10 * time.Second}
@@ -38,23 +35,28 @@ func Post(apiEndpoint string, jsonData []byte) []byte {
 	return bodyBytes
 }
 
-func GetMotelChainIds(apiURL string) ([]string, error) {
-	resp, err := http.Get(apiURL)
+func Get(url string) []byte {
+	resp, err := http.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("failed to send GET request: %v", err)
+		fmt.Printf("failed to send GET request: %v\n", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		fmt.Printf("unexpected status code: %d\n", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %v", err)
+		fmt.Printf("failed to read response body: %v\n", err)
 	}
+	return body
+}
 
-	var motels []MotelChainMinimal
+func GetMotelChainIds(apiURL string) ([]string, error) {
+
+	body := Get(apiURL)
+	var motels []MotelChainResponse
 	if err := json.Unmarshal(body, &motels); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON response: %v", err)
 	}
