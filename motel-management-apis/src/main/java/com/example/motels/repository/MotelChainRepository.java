@@ -8,4 +8,7 @@ import java.util.UUID;
 
 @Repository
 public interface MotelChainRepository extends JpaRepository<MotelChain, UUID> {
+    boolean existsByMotelChainNameAndPincodeAndState(String name, String pincode, String state);
+    MotelChain getByMotelChainNameAndPincodeAndState(String name, String pincode, String state);
+
 }
