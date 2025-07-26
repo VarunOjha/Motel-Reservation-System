@@ -28,7 +28,14 @@ public class MotelChainService {
     }
 
     public MotelChain createMotelChain(MotelChain motelChain) {
-        return motelChainRepository.save(motelChain);
+
+        String motelChainName = motelChain.getMotelChainName();
+        String pincode = motelChain.getPincode();
+        String state = motelChain.getState();
+        if(!motelChainRepository.existsByMotelChainNameAndPincodeAndState(motelChainName, pincode, state)) {
+            return motelChainRepository.save(motelChain);
+        }
+        return motelChainRepository.getByMotelChainNameAndPincodeAndState(motelChainName, pincode, state);
     }
 
     public MotelChain updateMotelChain(UUID motelChainId, MotelChain motelChainDetails) {
