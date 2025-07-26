@@ -1,0 +1,117 @@
+[
+    {
+      "motelChainName": "The Ojha's",
+      "displayName": "The Ojha's motel chain",
+      "state": "TX",
+      "pincode": "78665",
+      "status": "Active",
+      "address": {
+        "addressLine1": "The Ojha's motel SOUTHWEST PKWY",
+        "addressLine2": "Austin, TX",
+        "landmark": "HEB",
+        "addressName": "HeadQuarters",
+        "status": "Active"
+      },
+      "contactInfo": {
+        "phoneNumber": "6165449087",
+        "email": "vo@ojha.com",
+        "contactName": "V Ojha",
+        "contactPosition": "CEO",
+        "contactType": "Executive",
+        "contactDescription": "He is the CEO",
+        "status": "Active"
+      }
+    },
+    {
+      "motelChainName": "Blue Horizon Group",
+      "displayName": "Blue Horizon Motels",
+      "state": "CA",
+      "pincode": "90001",
+      "status": "Active",
+      "address": {
+        "addressLine1": "1200 Ocean View Blvd",
+        "addressLine2": "Santa Monica, CA",
+        "landmark": "Near Pier Park",
+        "addressName": "Main Office",
+        "status": "Active"
+      },
+      "contactInfo": {
+        "phoneNumber": "3105559832",
+        "email": "info@bluehorizon.com",
+        "contactName": "Samantha Ray",
+        "contactPosition": "Director",
+        "contactType": "Executive",
+        "contactDescription": "Oversees all west coast operations",
+        "status": "Active"
+      }
+    },
+    {
+      "motelChainName": "Desert Stay Inn",
+      "displayName": "Desert Stay Inn Motels",
+      "state": "AZ",
+      "pincode": "85001",
+      "status": "Inactive",
+      "address": {
+        "addressLine1": "88 Cactus Lane",
+        "addressLine2": "Phoenix, AZ",
+        "landmark": "Opposite City Mall",
+        "addressName": "HQ",
+        "status": "Inactive"
+      },
+      "contactInfo": {
+        "phoneNumber": "4801234567",
+        "email": "contact@desertstay.com",
+        "contactName": "Juan Lopez",
+        "contactPosition": "Regional Manager",
+        "contactType": "Operations",
+        "contactDescription": "Temporarily closed for renovations",
+        "status": "Inactive"
+      }
+    },
+    {
+      "motelChainName": "MapleLeaf Motels",
+      "displayName": "MapleLeaf Family Stays",
+      "state": "WA",
+      "pincode": "98101",
+      "status": "Active",
+      "address": {
+        "addressLine1": "455 Pine Street",
+        "addressLine2": "Seattle, WA",
+        "landmark": "Next to Central Library",
+        "addressName": "Seattle HQ",
+        "status": "Active"
+      },
+      "contactInfo": {
+        "phoneNumber": "2069876543",
+        "email": "hq@mapleleafmotels.com",
+        "contactName": "Angela Brooks",
+        "contactPosition": "Chief Admin",
+        "contactType": "Admin",
+        "contactDescription": "Manages customer experience team",
+        "status": "Active"
+      }
+    },
+    {
+      "motelChainName": "Lone Star Suites",
+      "displayName": "Lone Star Luxury Suites",
+      "state": "TX",
+      "pincode": "75201",
+      "status": "Active",
+      "address": {
+        "addressLine1": "2101 Lone Star Blvd",
+        "addressLine2": "Dallas, TX",
+        "landmark": "Near Convention Center",
+        "addressName": "Regional Hub",
+        "status": "Active"
+      },
+      "contactInfo": {
+        "phoneNumber": "2145556789",
+        "email": "manager@lonestarsuites.com",
+        "contactName": "Robert Young",
+        "contactPosition": "Franchise Manager",
+        "contactType": "Management",
+        "contactDescription": "Handles franchise relations",
+        "status": "Active"
+      }
+    }
+  ]

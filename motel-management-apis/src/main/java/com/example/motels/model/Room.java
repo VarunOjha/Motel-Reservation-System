@@ -1,21 +1,31 @@
 package com.example.motels.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.Data;
+
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import lombok.Data;
-
 @Data
-public class MotelChainContactInfo {
-    private String phoneNumber;
-    private String email;
-    private String contactName;
-    private String contactPosition;
-    private String contactType;
-    private String contactDescription;
+@Entity
+public class Room {
+
+    @Id
+    @GeneratedValue
+    private UUID roomId;
+
+    private UUID motelChainId;
+    private UUID motelId;
+
+    private String roomNumber;
     private String status;
+
+    private String floor;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -24,5 +34,4 @@ public class MotelChainContactInfo {
     private LocalDateTime updatedAt;
 
     private LocalDateTime deletedAt;
-
 }
