@@ -15,8 +15,9 @@ public class MotelService {
     @Autowired
     private MotelRepository motelRepository;
 
-    public List<Motel> getAllMotelsByChainId(UUID motelChainId) {
-        return motelRepository.getByMotelChainId(motelChainId); // Replace with a custom query if needed
+    public List<Motel> getAllMotelsByChainId(String motelChainId) {
+        // Example query logic, assuming a method exists in the repository
+        return motelRepository.findAll(); // Replace with a custom query if needed
     }
 
     public Optional<Motel> getMotelById(UUID motelId) {
@@ -24,13 +25,6 @@ public class MotelService {
     }
 
     public Motel createMotel(Motel motel) {
-        String motelName = motel.getMotelName();
-        String pincode = motel.getPincode();
-        String state = motel.getState();
-        UUID motelchainString = motel.getMotelChainId();
-        if(motelRepository.existsByMotelChainIdAndMotelNameAndPincodeAndState(motelchainString, motelName, pincode, state)) {
-            return motelRepository.getByMotelChainIdAndMotelNameAndPincodeAndState(motelchainString, motelName, pincode, state);
-        }
         return motelRepository.save(motel);
     }
 
