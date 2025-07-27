@@ -2,7 +2,6 @@ package motelclient
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -31,7 +30,6 @@ func Post(apiEndpoint string, jsonData []byte) []byte {
 	}
 
 	// Print for debug
-	fmt.Printf("Response for motel:\nStatus: %s\nBody:\n%s\n\n", resp.Status, string(bodyBytes))
 	return bodyBytes
 }
 
@@ -50,23 +48,6 @@ func Get(url string) []byte {
 	if err != nil {
 		fmt.Printf("failed to read response body: %v\n", err)
 	}
+	fmt.Printf("Response for motel:\nStatus: %s\nBody:\n%s\n\n", resp.Status, string(body))
 	return body
-}
-
-func GetMotelChainIds(apiURL string) ([]string, error) {
-
-	body := Get(apiURL)
-	var motels []MotelChainResponse
-	if err := json.Unmarshal(body, &motels); err != nil {
-		return nil, fmt.Errorf("failed to parse JSON response: %v", err)
-	}
-
-	var ids []string
-	for _, motel := range motels {
-		if motel.MotelChainId != "" {
-			ids = append(ids, motel.MotelChainId)
-		}
-	}
-
-	return ids, nil
 }

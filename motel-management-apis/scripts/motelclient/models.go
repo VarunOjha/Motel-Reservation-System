@@ -33,3 +33,43 @@ type MotelChain struct {
 type MotelChainResponse struct {
 	MotelChainId string `json:"motelChainId"`
 }
+
+type Motel struct {
+	MotelChainId string      `json:"motelChainId"`
+	MotelId      string      `json:"motelId"`
+	MotelName    string      `json:"motelChainName"`
+	DisplayName  string      `json:"displayName"`
+	State        string      `json:"state"`
+	Pincode      string      `json:"pincode"`
+	Status       string      `json:"status"`
+	Address      Address     `json:"address"`
+	ContactInfo  ContactInfo `json:"contactInfo"`
+}
+
+type MotelIDs struct {
+	MotelID      string
+	MotelChainID string
+}
+
+type RoomCategory struct {
+	RoomCategoryName string `json:"roomCategoryName"`
+	DisplayName      string `json:"displayName"`
+	Name             string `json:"name"`
+	Description      string `json:"description"` // Note: matches your key spelling
+	Status           string `json:"status"`
+}
+
+type MotelRoomCategory struct {
+	MotelID             string
+	MotelChainID        string
+	MotelRoomCategoryID string
+}
+
+type Room struct {
+	MotelID             string `json:"motelId"`
+	MotelChainID        string `json:"motelChainId"`
+	MotelRoomCategoryID string `json:"motelRoomCategoryId"`
+	Floor               string `json:"floor"`
+	RoomNumber          string `json:"roomNumber"`
+	Status              string `json:"status"`
+}

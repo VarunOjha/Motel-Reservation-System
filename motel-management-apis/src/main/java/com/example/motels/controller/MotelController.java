@@ -11,14 +11,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/motels/chain/{motelChainId}/motels")
+@RequestMapping("/api/motels/chains/{motelChainId}/motels")
 public class MotelController {
 
     @Autowired
     private MotelService motelService;
 
     @GetMapping
-    public ResponseEntity<List<Motel>> getAllMotelsByChainId(@PathVariable String motelChainId) {
+    public ResponseEntity<List<Motel>> getAllMotelsByChainId(@PathVariable UUID motelChainId) {
         List<Motel> motels = motelService.getAllMotelsByChainId(motelChainId);
         return ResponseEntity.ok(motels);
     }

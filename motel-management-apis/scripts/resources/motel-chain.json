@@ -69,29 +69,6 @@
       }
     },
     {
-      "motelChainName": "MapleLeaf Motels",
-      "displayName": "MapleLeaf Family Stays",
-      "state": "WA",
-      "pincode": "98101",
-      "status": "Active",
-      "address": {
-        "addressLine1": "455 Pine Street",
-        "addressLine2": "Seattle, WA",
-        "landmark": "Next to Central Library",
-        "addressName": "Seattle HQ",
-        "status": "Active"
-      },
-      "contactInfo": {
-        "phoneNumber": "2069876543",
-        "email": "hq@mapleleafmotels.com",
-        "contactName": "Angela Brooks",
-        "contactPosition": "Chief Admin",
-        "contactType": "Admin",
-        "contactDescription": "Manages customer experience team",
-        "status": "Active"
-      }
-    },
-    {
       "motelChainName": "Lone Star Suites",
       "displayName": "Lone Star Luxury Suites",
       "state": "TX",
@@ -111,6 +88,29 @@
         "contactPosition": "Franchise Manager",
         "contactType": "Management",
         "contactDescription": "Handles franchise relations",
+        "status": "Active"
+      }
+    },
+    {
+      "motelChainName": "MapleLeaf Motels",
+      "displayName": "MapleLeaf Family Stays",
+      "state": "WA",
+      "pincode": "98101",
+      "status": "Active",
+      "address": {
+        "addressLine1": "455 Pine Street",
+        "addressLine2": "Seattle, WA",
+        "landmark": "Next to Central Library",
+        "addressName": "Seattle HQ",
+        "status": "Active"
+      },
+      "contactInfo": {
+        "phoneNumber": "2069876543",
+        "email": "hq@mapleleafmotels.com",
+        "contactName": "Angela Brooks",
+        "contactPosition": "Chief Admin",
+        "contactType": "Admin",
+        "contactDescription": "Manages customer experience team",
         "status": "Active"
       }
     }
