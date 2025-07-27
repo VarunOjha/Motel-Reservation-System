@@ -27,6 +27,10 @@ public class RoomCategoryService {
     public RoomCategory createRoomCategory(UUID motelChainId, UUID motelId, RoomCategory roomCategory) {
         roomCategory.setMotelChainId(motelChainId);
         roomCategory.setMotelId(motelId);
+        String roomCategoryName = roomCategory.getRoomCategoryName();
+        if (roomCategoryRepository.existsByRoomCategoryNameAndMotelChainIdAndMotelId(roomCategoryName, motelChainId, motelId)) {
+            return roomCategoryRepository.findByRoomCategoryNameAndMotelChainIdAndMotelId(roomCategoryName, motelChainId, motelId);
+        }
         return roomCategoryRepository.save(roomCategory);
     }
 

@@ -1,7 +1,7 @@
 [
     {
-      "motelChainName": "The Ojha's",
-      "displayName": "The Ojha's motel chain",
+      "motelName": "Motel1",
+      "displayName": "Motel1",
       "state": "TX",
       "pincode": "78665",
       "status": "Active",
@@ -9,7 +9,7 @@
         "addressLine1": "The Ojha's motel SOUTHWEST PKWY",
         "addressLine2": "Austin, TX",
         "landmark": "HEB",
-        "addressName": "HeadQuarters",
+        "addressName": "Motel Location",
         "status": "Active"
       },
       "contactInfo": {
@@ -23,95 +23,96 @@
       }
     },
     {
-      "motelChainName": "Blue Horizon Group",
-      "displayName": "Blue Horizon Motels",
+      "motelName": "BlueBay Inn",
+      "displayName": "BlueBay Seaside Motel",
       "state": "CA",
-      "pincode": "90001",
+      "pincode": "90210",
       "status": "Active",
       "address": {
-        "addressLine1": "1200 Ocean View Blvd",
+        "addressLine1": "450 Oceanview Blvd",
         "addressLine2": "Santa Monica, CA",
-        "landmark": "Near Pier Park",
-        "addressName": "Main Office",
+        "landmark": "Near the Pier",
+        "addressName": "Beachfront Motel",
         "status": "Active"
       },
       "contactInfo": {
-        "phoneNumber": "3105559832",
-        "email": "info@bluehorizon.com",
+        "phoneNumber": "3101234567",
+        "email": "info@bluebay.com",
         "contactName": "Samantha Ray",
-        "contactPosition": "Director",
-        "contactType": "Executive",
-        "contactDescription": "Oversees all west coast operations",
+        "contactPosition": "Manager",
+        "contactType": "Operations",
+        "contactDescription": "Oversees operations",
         "status": "Active"
       }
     },
     {
-      "motelChainName": "Desert Stay Inn",
-      "displayName": "Desert Stay Inn Motels",
+      "motelName": "DesertStay",
+      "displayName": "DesertStay Phoenix",
       "state": "AZ",
       "pincode": "85001",
       "status": "Inactive",
       "address": {
-        "addressLine1": "88 Cactus Lane",
+        "addressLine1": "800 Cactus Rd",
         "addressLine2": "Phoenix, AZ",
-        "landmark": "Opposite City Mall",
-        "addressName": "HQ",
+        "landmark": "Opposite Grand Mall",
+        "addressName": "Downtown Unit",
         "status": "Inactive"
       },
       "contactInfo": {
-        "phoneNumber": "4801234567",
-        "email": "contact@desertstay.com",
+        "phoneNumber": "4809876543",
+        "email": "support@desertstay.com",
         "contactName": "Juan Lopez",
-        "contactPosition": "Regional Manager",
+        "contactPosition": "Site Lead",
         "contactType": "Operations",
-        "contactDescription": "Temporarily closed for renovations",
+        "contactDescription": "Temporarily closed for maintenance",
         "status": "Inactive"
       }
     },
     {
-      "motelChainName": "Lone Star Suites",
-      "displayName": "Lone Star Luxury Suites",
+      "motelName": "UrbanLodge",
+      "displayName": "UrbanLodge Dallas",
       "state": "TX",
       "pincode": "75201",
       "status": "Active",
       "address": {
-        "addressLine1": "2101 Lone Star Blvd",
+        "addressLine1": "200 Elm Street",
         "addressLine2": "Dallas, TX",
         "landmark": "Near Convention Center",
-        "addressName": "Regional Hub",
+        "addressName": "Uptown Branch",
         "status": "Active"
       },
       "contactInfo": {
-        "phoneNumber": "2145556789",
-        "email": "manager@lonestarsuites.com",
+        "phoneNumber": "2145678901",
+        "email": "contact@urbanlodge.com",
         "contactName": "Robert Young",
         "contactPosition": "Franchise Manager",
         "contactType": "Management",
-        "contactDescription": "Handles franchise relations",
+        "contactDescription": "Handles Dallas region",
         "status": "Active"
       }
     },
     {
-      "motelChainName": "MapleLeaf Motels",
-      "displayName": "MapleLeaf Family Stays",
+      "motelName": "MapleLeaf Stay",
+      "displayName": "MapleLeaf Downtown",
       "state": "WA",
       "pincode": "98101",
       "status": "Active",
       "address": {
-        "addressLine1": "455 Pine Street",
+        "addressLine1": "120 Pine Street",
         "addressLine2": "Seattle, WA",
         "landmark": "Next to Central Library",
-        "addressName": "Seattle HQ",
+        "addressName": "City Center Unit",
         "status": "Active"
       },
       "contactInfo": {
-        "phoneNumber": "2069876543",
-        "email": "hq@mapleleafmotels.com",
+        "phoneNumber": "2066789012",
+        "email": "admin@mapleleafstay.com",
         "contactName": "Angela Brooks",
-        "contactPosition": "Chief Admin",
+        "contactPosition": "Admin",
         "contactType": "Admin",
-        "contactDescription": "Manages customer experience team",
+        "contactDescription": "Front desk management",
         "status": "Active"
       }
     }
   ]
+  

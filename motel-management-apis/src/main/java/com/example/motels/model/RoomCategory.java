@@ -23,6 +23,7 @@ public class RoomCategory {
     private UUID motelId;
 
     private String displayName;
+    private String roomCategoryName;
     private String description;
 
     private String status;

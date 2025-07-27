@@ -17,4 +17,6 @@ public interface RoomCategoryRepository extends JpaRepository<RoomCategory, UUID
     Optional<RoomCategory> findByMotelRoomCategoryIdAndMotelChainIdAndMotelId(UUID roomCategoryId, UUID motelChainId, UUID motelId);
 
     boolean existsByMotelRoomCategoryIdAndMotelChainIdAndMotelId(UUID roomCategoryId, UUID motelChainId, UUID motelId);
+    boolean existsByRoomCategoryNameAndMotelChainIdAndMotelId(String roomCategoryName, UUID motelChainId, UUID motelId);
+    RoomCategory findByRoomCategoryNameAndMotelChainIdAndMotelId(String roomCategoryName, UUID motelChainId, UUID motelId);
 }

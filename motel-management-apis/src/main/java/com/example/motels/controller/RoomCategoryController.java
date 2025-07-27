@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/motels/chains/{motelChainId}/motels/{motelId}/roomCategories")
+@RequestMapping("/api/motels/chains/{motelChainId}/motels/{motelId}/rooms/categories")
 public class RoomCategoryController {
 
     @Autowired

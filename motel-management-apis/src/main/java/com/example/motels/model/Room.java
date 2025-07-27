@@ -21,11 +21,12 @@ public class Room {
 
     private UUID motelChainId;
     private UUID motelId;
+    private UUID motelRoomCategoryId;
 
     private String roomNumber;
-    private String status;
-
     private String floor;
+
+    private String status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
