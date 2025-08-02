@@ -1,0 +1,13 @@
+[package]
+name = "motel-api-gateway"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.34", features = ["full"] } # Updated to latest compatible version
+hyper = { version = "0.14.27", features = ["full"] } # Ensure compatibility with HTTP/2
+serde = { version = "1.0.163", features = ["derive"] } # Latest version for serialization
+serde_yaml = "0.9.21" # Updated YAML parsing library
+tower = "0.4.13" # Latest version for middleware
+tower-http = { version = "0.6.6", features = ["trace", "limit"] } # Updated for HTTP utilities
+dashmap = "5.4.0" # Latest version for thread-safe map
