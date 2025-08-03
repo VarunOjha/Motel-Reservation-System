@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/motels/chains")
+@RequestMapping("/motelApi/v1/motels/chains")
 public class MotelChainController {
 
     @Autowired
