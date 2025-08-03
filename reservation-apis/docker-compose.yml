@@ -4,7 +4,7 @@ services:
   api:
     build: .
     ports:
-      - "8080:8080"
+      - "8086:8086"
     depends_on:
       - mongo
     environment:
