@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/motels/chain/{motelChainId}/motels")
+@RequestMapping("/motelApi/v1/motels/chain/{motelChainId}/motels")
 public class MotelController {
 
     @Autowired
