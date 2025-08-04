@@ -1,0 +1,7 @@
+routes:
+  - path: "/motelApi/v1/motels/chains"
+    upstream: "http://host.docker.internal:8085"
+    rate_limit: 100
+  - path: "/motelApi/v1/motels/chain/{motelChainId}/motels"
+    upstream: "http://host.docker.internal:8085"
+    rate_limit: 100
