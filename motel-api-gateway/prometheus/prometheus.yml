@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'motel-api-gateway'
+    static_configs:
+      - targets: ['motel-api-gateway:8080']

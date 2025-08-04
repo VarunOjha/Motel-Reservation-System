@@ -13,7 +13,7 @@ use std::time::Duration;
 
 #[tokio::main]
 async fn main() {
-    let config = match GatewayConfig::load_from_file("routes.yaml") {
+    let config = match GatewayConfig::load_from_file("config/routes.yaml") {
         Ok(cfg) => cfg,
         Err(err) => {
             eprintln!("Failed to load configuration: {}", err);
