@@ -1,0 +1,4 @@
+{
+    // Enable automatic null analysis for Java compilation to catch potential null pointer exceptions
+    "java.compile.nullAnalysis.mode": "automatic"
+}

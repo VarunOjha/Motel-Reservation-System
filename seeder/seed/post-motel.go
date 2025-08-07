@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-func AddMotelsToMotelChains() []motelclient.MotelIDs {
-	getMotelChainsApi := "http://localhost:8080/api/motels/chains"
+func AddMotelsToMotelChains(apiBaseUrl string) []motelclient.MotelIDs {
+	getMotelChainsApi := apiBaseUrl + "/motels/chains"
 	motelSeedJsonPath := "resources/motel.json"
 
 	var motelMappings []motelclient.MotelIDs
@@ -23,18 +23,24 @@ func AddMotelsToMotelChains() []motelclient.MotelIDs {
 	err = json.Unmarshal(jsonFile, &motels)
 	if err != nil {
 		fmt.Printf("error parsing JSON: %v\n", err)
+		return nil
 	}
 
 	body := motelclient.Get(getMotelChainsApi)
+	if body == nil {
+		fmt.Printf("failed to get motel chains from API: %s\n", getMotelChainsApi)
+		return nil
+	}
+
 	var motelChains []motelclient.MotelChain
 	if err := json.Unmarshal(body, &motelChains); err != nil {
 		fmt.Printf("failed to parse JSON response: %v\n", err)
+		return nil
 	}
 
 	var motelChainIds []string
 	for _, motelChains := range motelChains {
 		if motelChains.MotelChainId != "" {
-			// fmt.Printf("IDs: %s\n", ids)
 			motelChainIds = append(motelChainIds, motelChains.MotelChainId)
 		}
 	}
@@ -42,7 +48,7 @@ func AddMotelsToMotelChains() []motelclient.MotelIDs {
 	fmt.Println("Adding motels to motel chains")
 	count := 0
 	for _, motelChainId := range motelChainIds {
-		postMotelApi := getMotelChainsApi + "/" + motelChainId + "/motels"
+		postMotelApi := apiBaseUrl + "/motels/chain/" + motelChainId + "/motels"
 
 		motel := motels[count]
 		count++
@@ -66,7 +72,7 @@ func AddMotelsToMotelChains() []motelclient.MotelIDs {
 
 		if val, ok := response["motelId"]; ok {
 			if motelId, isStr := val.(string); isStr {
-				fmt.Printf("Motel ID: %s MotelChainId: %s\n", motelId, motelChainId) // Example usage of results
+				fmt.Printf("Motel ID: %s MotelChainId: %s\n", motelId, motelChainId)
 				var motelMapping motelclient.MotelIDs
 				motelMapping.MotelID = motelId
 				motelMapping.MotelChainID = motelChainId

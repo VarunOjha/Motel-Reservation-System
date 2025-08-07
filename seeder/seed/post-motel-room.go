@@ -7,15 +7,13 @@ import (
 	"strconv"
 )
 
-func AddRoomsToMotel(motelRoomCategoriesMapping []motelclient.MotelRoomCategory) {
-	baseUrl := "http://localhost:8080/api/motels/chains"
-
+func AddRoomsToMotel(apiBaseUrl string, motelRoomCategoriesMapping []motelclient.MotelRoomCategory) {
 	for _, motelRoomCategories := range motelRoomCategoriesMapping {
 		motelChainId := motelRoomCategories.MotelChainID
 		motelId := motelRoomCategories.MotelID
 		motelRoomCategoriesId := motelRoomCategories.MotelRoomCategoryID
 
-		postRoomCategoryApi := baseUrl + "/" + motelChainId + "/motels/" + motelId + "/rooms"
+		postRoomCategoryApi := apiBaseUrl + "/motels/chains/" + motelChainId + "/motels/" + motelId + "/rooms"
 
 		for i := 1; i <= 25; i++ { // Loop to run 24 times
 			var room motelclient.Room
@@ -26,16 +24,11 @@ func AddRoomsToMotel(motelRoomCategoriesMapping []motelclient.MotelRoomCategory)
 			room.RoomNumber = strconv.Itoa(i*100 + i) // Assign room number
 			room.Status = "Active"
 
-			// Convert room to JSON
 			roomJson, err := json.Marshal(room)
 			if err != nil {
 				fmt.Println("Error marshaling room:", err)
 				continue
 			}
-
-			// Print or send the room data
-			fmt.Println("Posting room:", string(roomJson))
-			// You can add code here to send the room data to the API using an HTTP client
 
 			bodyBytes := motelclient.Post(postRoomCategoryApi, roomJson)
 			if bodyBytes == nil {
@@ -57,6 +50,5 @@ func AddRoomsToMotel(motelRoomCategoriesMapping []motelclient.MotelRoomCategory)
 				}
 			}
 		}
-
 	}
 }

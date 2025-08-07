@@ -2,25 +2,25 @@
     {
       "displayName": "Regular Room",
       "roomCategoryName": "Regular",
-      "desicription": "Regular room 400 sqft",
+      "description": "Regular room 400 sqft",
       "status": "Active"
     },
     {
       "displayName": "Deluxe Room",
       "roomCategoryName": "Deluxe",
-      "desicription": "Spacious deluxe room with king bed, 550 sqft",
+      "description": "Spacious deluxe room with king bed, 550 sqft",
       "status": "Active"
     },
     {
       "displayName": "Suite",
       "roomCategoryName": "Suite",
-      "desicription": "Luxury suite with separate living area, 750 sqft",
+      "description": "Luxury suite with separate living area, 750 sqft",
       "status": "Active"
     },
     {
       "displayName": "Economy Room",
       "roomCategoryName": "Economy",
-      "desicription": "Compact and affordable room, 300 sqft",
+      "description": "Compact and affordable room, 300 sqft",
       "status": "Active"
     }
   ]

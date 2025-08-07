@@ -6,7 +6,7 @@ set -e
 
 echo "Docker Compose Down"
 
-docker-compose down
+docker compose down
 
 echo "Remove the volumne"
 docker volume rm $(docker volume ls -qf name=motel_pgdata)

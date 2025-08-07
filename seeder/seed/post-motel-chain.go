@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-func AddMotelChains() {
-	apiEndpoint := "http://localhost:8080/api/motels/chains"
+func AddMotelChains(apiBaseUrl string) {
+	apiEndpoint := apiBaseUrl + "/motels/chains"
 	jsonPath := "resources/motel-chain.json"
 
 	// Read JSON file
@@ -22,6 +22,7 @@ func AddMotelChains() {
 	err = json.Unmarshal(jsonFile, &motels)
 	if err != nil {
 		fmt.Printf("error parsing JSON: %v\n", err)
+		return
 	}
 	var results []string
 

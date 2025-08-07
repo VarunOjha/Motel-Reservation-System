@@ -37,7 +37,7 @@ type MotelChainResponse struct {
 type Motel struct {
 	MotelChainId string      `json:"motelChainId"`
 	MotelId      string      `json:"motelId"`
-	MotelName    string      `json:"motelChainName"`
+	MotelName    string      `json:"motelName"`
 	DisplayName  string      `json:"displayName"`
 	State        string      `json:"state"`
 	Pincode      string      `json:"pincode"`
