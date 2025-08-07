@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: motel-management-apis
+spec:
+  selector:
+    app: motel-management-apis
+  ports:
+    - protocol: TCP
+      port: 8085
+      targetPort: 8085
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: motel-management-apis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: motel-management-apis
+  template:
+    metadata:
+      labels:
+        app: motel-management-apis
+    spec:
+      containers:
+        - name: motel-management-apis
+          image: 520320208231.dkr.ecr.us-west-2.amazonaws.com/motel-management-apis:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8085
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/moteldb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: moteluser
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: motelpass

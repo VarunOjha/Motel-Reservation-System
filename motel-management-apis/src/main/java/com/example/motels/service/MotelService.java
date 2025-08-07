@@ -15,6 +15,10 @@ public class MotelService {
     @Autowired
     private MotelRepository motelRepository;
 
+    public List<Motel> getAllMotels() {
+        return motelRepository.findAll();
+    }
+
     public List<Motel> getAllMotelsByChainId(String motelChainId) {
         // Example query logic, assuming a method exists in the repository
         return motelRepository.findAll(); // Replace with a custom query if needed

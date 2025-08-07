@@ -1,0 +1,22 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: motel-dev-cluster
+  region: us-west-2
+
+managedNodeGroups:
+  - name: motel-spot-nodes
+    minSize: 3
+    maxSize: 5
+    desiredCapacity: 3
+    spot: true
+    instanceTypes: ["t3.small", "t3.medium"]
+    volumeSize: 20
+    labels:
+      lifecycle: Ec2Spot
+    tags:
+      "k8s.io/cluster-autoscaler/enabled": "true"
+      "k8s.io/cluster-autoscaler/motel-dev-cluster": "owned"
+    ssh:
+      allow: true

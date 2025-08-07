@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: reservation-apis
+spec:
+  selector:
+    app: reservation-apis
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservation-apis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reservation-apis
+  template:
+    metadata:
+      labels:
+        app: reservation-apis
+    spec:
+      containers:
+        - name: reservation-apis
+          image: 520320208231.dkr.ecr.us-west-2.amazonaws.com/reservation-apis:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8086
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo:27017
+            - name: MONGO_DB
+              value: motel

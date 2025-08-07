@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: motel-api-gateway
+spec:
+  selector:
+    app: motel-api-gateway
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: motel-api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: motel-api-gateway
+  template:
+    metadata:
+      labels:
+        app: motel-api-gateway
+    spec:
+      containers:
+        - name: motel-api-gateway
+          image: 520320208231.dkr.ecr.us-west-2.amazonaws.com/motel-api-gateway:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: RESERVATION_API_URL
+              value: http://reservation-apis:8086
+            - name: MANAGEMENT_API_URL
+              value: http://motel-management-apis:8085
