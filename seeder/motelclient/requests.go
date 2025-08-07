@@ -25,9 +25,8 @@ func Post(apiEndpoint string, jsonData []byte) []byte {
 	}
 	defer resp.Body.Close()
 
-	// Check HTTP status code
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		fmt.Printf("HTTP error: %d %s for endpoint: %s\n", resp.StatusCode, resp.Status, apiEndpoint)
+	if resp.StatusCode != 201 {
+		fmt.Printf("HTTP error: %d %s for endpoint: %s (Expected: 201 Created)\n", resp.StatusCode, resp.Status, apiEndpoint)
 		return nil
 	}
 

@@ -3,6 +3,7 @@ package com.example.motels.controller;
 import com.example.motels.model.Motel;
 import com.example.motels.service.MotelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class MotelController {
     public ResponseEntity<Motel> createMotel(@PathVariable String motelChainId, @RequestBody Motel motel) {
         motel.setMotelChainId(motelChainId);
         Motel createdMotel = motelService.createMotel(motel);
-        return ResponseEntity.ok(createdMotel);
+        return new ResponseEntity<>(createdMotel, HttpStatus.CREATED);
     }
 
     @PutMapping("/{motelId}")

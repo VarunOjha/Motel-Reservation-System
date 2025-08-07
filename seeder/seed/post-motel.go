@@ -48,6 +48,13 @@ func AddMotelsToMotelChains(apiBaseUrl string) []motelclient.MotelIDs {
 	fmt.Println("Adding motels to motel chains")
 	count := 0
 	for _, motelChainId := range motelChainIds {
+		// Check if we have run out of motels to assign to remaining motel chains
+		// This prevents index out of bounds errors when there are more chains than motels
+		if count >= len(motels) {
+			fmt.Printf("Skipping chain %s - no more motels available\n", motelChainId)
+			continue
+		}
+
 		postMotelApi := apiBaseUrl + "/motels/chain/" + motelChainId + "/motels"
 
 		motel := motels[count]
