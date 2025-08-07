@@ -1,8 +1,0 @@
-routes:
-  - path: /api/service1
-    upstream: http://localhost:5001
-    rate_limit: 10 # requests per minute
-
-  - path: /api/service2
-    upstream: http://localhost:5002
-    rate_limit: 5
