@@ -8,7 +8,7 @@ import (
 )
 
 func AddMotelChains() {
-	apiEndpoint := "http://localhost:8080/api/motels/chains"
+	apiEndpoint := "http://a85a9798b265f437f9c79edf50d2f68d-1226124390.us-west-2.elb.amazonaws.com/motelApi/v1/motels/chains"
 	jsonPath := "resources/motel-chain.json"
 
 	// Read JSON file

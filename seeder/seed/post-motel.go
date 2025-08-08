@@ -8,7 +8,7 @@ import (
 )
 
 func AddMotelsToMotelChains() []motelclient.MotelIDs {
-	getMotelChainsApi := "http://localhost:8080/api/motels/chains"
+	getMotelChainsApi := "http://a85a9798b265f437f9c79edf50d2f68d-1226124390.us-west-2.elb.amazonaws.com/motelApi/v1/motels/chains"
 	motelSeedJsonPath := "resources/motel.json"
 
 	var motelMappings []motelclient.MotelIDs
