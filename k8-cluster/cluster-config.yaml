@@ -2,7 +2,7 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: motel-dev-cluster
+  name: motel-cluster-dev
   region: us-west-2
 
 managedNodeGroups:
