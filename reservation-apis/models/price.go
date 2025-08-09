@@ -7,7 +7,7 @@ type MotelRoomPrice struct {
 	MotelChainID          string    `json:"motel_chain_id" bson:"motel_chain_id"`
 	MotelRoomCategoryID   string    `json:"motel_room_category_id" bson:"motel_room_category_id"`
 	MotelRoomCategoryName string    `json:"room_type" bson:"motel_room_category_name"`
-	AvailableRoomCount    string    `json:"room_number" bson:"available_room_count"`
+	AvailableRoomCount    string    `json:"available_room_number" bson:"available_room_count"`
 	Date                  string    `json:"date" bson:"date"`
 	Status                string    `json:"status" bson:"status"`
 	Price                 float64   `json:"price" bson:"price"`
