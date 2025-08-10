@@ -10,9 +10,9 @@ type MotelRoomPrice struct {
 	AvailableRoomCount    string    `json:"available_room_number" bson:"available_room_count"`
 	Date                  string    `json:"date" bson:"date"`
 	Status                string    `json:"status" bson:"status"`
-	Price                 float64   `json:"price" bson:"price"`
-	BookedRoomCount       int       `json:"booked_room_count" bson:"booked_room_count"`
-	Version               int       `json:"version" bson:"version"` // Version field for tracking document version
+	Price                 string    `json:"price" bson:"price"`
+	BookedRoomCount       string    `json:"booked_room_count" bson:"booked_room_count"`
+	Version               string    `json:"version" bson:"version"`
 	CreatedAt             time.Time `json:"created_at" bson:"created_at"`
 	UpdatedAt             time.Time `json:"updated_at" bson:"updated_at"`
 	DeletedAt             time.Time `json:"deleted_at" bson:"deleted_at"`

@@ -21,6 +21,8 @@ public class Motel {
     private UUID motelId;
     private String motelName;
     private String status;
+    private String pincode;
+    private String state;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

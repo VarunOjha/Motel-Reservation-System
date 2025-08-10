@@ -1,10 +1,10 @@
 package com.example.motels.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.motels.model.ApiResponse;
 import com.example.motels.service.RoomCategoryService;
 import com.example.motels.model.RoomCategory;
 
@@ -12,43 +12,107 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/motelApi/v1/motels/chains/{motelChainId}/motels/{motelId}/rooms/categories")
+@RequestMapping("/motelApi/v1/motelRoomCategories")
 public class RoomCategoryController {
 
     @Autowired
     private RoomCategoryService roomCategoryService;
 
     @GetMapping
-    public ResponseEntity<List<RoomCategory>> getAllRoomCategories(@PathVariable UUID motelChainId, @PathVariable UUID motelId) {
-        List<RoomCategory> roomCategories = roomCategoryService.getAllRoomCategories(motelChainId, motelId);
-        return new ResponseEntity<>(roomCategories, HttpStatus.OK);
+    public ResponseEntity<ApiResponse<List<RoomCategory>>> getAllRoomCategories(
+            @RequestParam(value = "motelID", required = false) String motelIdStr,
+            @RequestParam(value = "motelChainID", required = false) String motelChainIdStr,
+            @RequestParam(value = "status", required = false) String status) {
+        
+        // Convert string parameters to UUID if provided
+        UUID motelId = null;
+        UUID motelChainId = null;
+        
+        if (motelIdStr != null && !motelIdStr.trim().isEmpty()) {
+            try {
+                motelId = UUID.fromString(motelIdStr);
+            } catch (IllegalArgumentException e) {
+                ApiResponse<List<RoomCategory>> errorResponse = new ApiResponse<>("400", null, "Invalid motelID format");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+        }
+        
+        if (motelChainIdStr != null && !motelChainIdStr.trim().isEmpty()) {
+            try {
+                motelChainId = UUID.fromString(motelChainIdStr);
+            } catch (IllegalArgumentException e) {
+                ApiResponse<List<RoomCategory>> errorResponse = new ApiResponse<>("400", null, "Invalid motelChainID format");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+        }
+        
+        List<RoomCategory> roomCategories = roomCategoryService.getAllRoomCategoriesWithFilters(motelId, motelChainId, status);
+        ApiResponse<List<RoomCategory>> response = new ApiResponse<>("200", roomCategories);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{roomCategoryId}")
-    public ResponseEntity<RoomCategory> getRoomCategoryById(@PathVariable UUID motelChainId, @PathVariable UUID motelId, @PathVariable UUID roomCategoryId) {
-        return roomCategoryService.getRoomCategoryById(motelChainId, motelId, roomCategoryId)
-                .map(roomCategory -> new ResponseEntity<>(roomCategory, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<ApiResponse<RoomCategory>> getRoomCategoryById(@PathVariable UUID roomCategoryId) {
+        return roomCategoryService.getRoomCategoryById(roomCategoryId)
+                .map(roomCategory -> {
+                    ApiResponse<RoomCategory> response = new ApiResponse<>("200", roomCategory);
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> {
+                    ApiResponse<RoomCategory> response = new ApiResponse<>("404", null, "Room category not found");
+                    return ResponseEntity.status(404).body(response);
+                });
     }
 
     @PostMapping
-    public ResponseEntity<RoomCategory> createRoomCategory(@PathVariable UUID motelChainId, @PathVariable UUID motelId, @RequestBody RoomCategory roomCategory) {
-        RoomCategory createdRoomCategory = roomCategoryService.createRoomCategory(motelChainId, motelId, roomCategory);
-        return new ResponseEntity<>(createdRoomCategory, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<RoomCategory>> createRoomCategory(@RequestBody RoomCategory roomCategory) {
+        // Validate required fields from payload
+        if (roomCategory.getMotelChainId() == null) {
+            ApiResponse<RoomCategory> errorResponse = new ApiResponse<>("400", null, "motelChainId is required in the payload");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        if (roomCategory.getMotelId() == null) {
+            ApiResponse<RoomCategory> errorResponse = new ApiResponse<>("400", null, "motelId is required in the payload");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        RoomCategory createdRoomCategory = roomCategoryService.createRoomCategory(roomCategory);
+        ApiResponse<RoomCategory> response = new ApiResponse<>("201", createdRoomCategory);
+        return ResponseEntity.status(201).body(response);
     }
 
     @PutMapping("/{roomCategoryId}")
-    public ResponseEntity<RoomCategory> updateRoomCategory(@PathVariable UUID motelChainId, @PathVariable UUID motelId, @PathVariable UUID roomCategoryId, @RequestBody RoomCategory roomCategory) {
-        RoomCategory updatedRoomCategory = roomCategoryService.updateRoomCategory(motelChainId, motelId, roomCategoryId, roomCategory);
-        return updatedRoomCategory != null ? new ResponseEntity<>(updatedRoomCategory, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<ApiResponse<RoomCategory>> updateRoomCategory(@PathVariable UUID roomCategoryId, @RequestBody RoomCategory roomCategory) {
+        // Validate required fields from payload
+        if (roomCategory.getMotelChainId() == null) {
+            ApiResponse<RoomCategory> errorResponse = new ApiResponse<>("400", null, "motelChainId is required in the payload");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        if (roomCategory.getMotelId() == null) {
+            ApiResponse<RoomCategory> errorResponse = new ApiResponse<>("400", null, "motelId is required in the payload");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        RoomCategory updatedRoomCategory = roomCategoryService.updateRoomCategory(roomCategoryId, roomCategory);
+        if (updatedRoomCategory != null) {
+            ApiResponse<RoomCategory> response = new ApiResponse<>("200", updatedRoomCategory);
+            return ResponseEntity.ok(response);
+        } else {
+            ApiResponse<RoomCategory> response = new ApiResponse<>("404", null, "Room category not found");
+            return ResponseEntity.status(404).body(response);
+        }
     }
 
     @DeleteMapping("/{roomCategoryId}")
-    public ResponseEntity<Void> deleteRoomCategory(@PathVariable UUID motelChainId, @PathVariable UUID motelId, @PathVariable UUID roomCategoryId) {
+    public ResponseEntity<ApiResponse<String>> deleteRoomCategory(@PathVariable UUID motelChainId, @PathVariable UUID motelId, @PathVariable UUID roomCategoryId) {
         if (roomCategoryService.deleteRoomCategory(motelChainId, motelId, roomCategoryId)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            ApiResponse<String> response = new ApiResponse<>("204", "Room category deleted successfully");
+            return ResponseEntity.status(204).body(response);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            ApiResponse<String> response = new ApiResponse<>("404", null, "Room category not found");
+            return ResponseEntity.status(404).body(response);
         }
     }
 }

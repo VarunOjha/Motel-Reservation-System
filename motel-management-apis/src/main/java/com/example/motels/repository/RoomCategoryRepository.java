@@ -13,6 +13,13 @@ import java.util.UUID;
 public interface RoomCategoryRepository extends JpaRepository<RoomCategory, UUID> {
 
     List<RoomCategory> findByMotelChainIdAndMotelId(UUID motelChainId, UUID motelId);
+    List<RoomCategory> findByMotelId(UUID motelId);
+    List<RoomCategory> findByMotelChainId(UUID motelChainId);
+    List<RoomCategory> findByStatus(String status);
+    List<RoomCategory> findByMotelIdAndMotelChainId(UUID motelId, UUID motelChainId);
+    List<RoomCategory> findByMotelIdAndStatus(UUID motelId, String status);
+    List<RoomCategory> findByMotelChainIdAndStatus(UUID motelChainId, String status);
+    List<RoomCategory> findByMotelIdAndMotelChainIdAndStatus(UUID motelId, UUID motelChainId, String status);
 
     Optional<RoomCategory> findByMotelRoomCategoryIdAndMotelChainIdAndMotelId(UUID roomCategoryId, UUID motelChainId, UUID motelId);
 
