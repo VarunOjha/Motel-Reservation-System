@@ -10,7 +10,11 @@ public class ApiResponse<T> {
     public ApiResponse() {}
     
     public ApiResponse(String httpCode, T data) {
-        this.response = new ResponseWrapper<>(httpCode, data);
+        this.response = new ResponseWrapper<>(httpCode, data, "");
+    }
+    
+    public ApiResponse(String httpCode, T data, String message) {
+        this.response = new ResponseWrapper<>(httpCode, data, message);
     }
     
     public ResponseWrapper<T> getResponse() {
@@ -28,11 +32,15 @@ public class ApiResponse<T> {
         @JsonProperty("data")
         private T data;
         
+        @JsonProperty("message")
+        private String message;
+        
         public ResponseWrapper() {}
         
-        public ResponseWrapper(String httpCode, T data) {
+        public ResponseWrapper(String httpCode, T data, String message) {
             this.httpCode = httpCode;
             this.data = data;
+            this.message = message != null ? message : "";
         }
         
         public String getHttpCode() {
@@ -49,6 +57,14 @@ public class ApiResponse<T> {
         
         public void setData(T data) {
             this.data = data;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
+        
+        public void setMessage(String message) {
+            this.message = message != null ? message : "";
         }
     }
 }

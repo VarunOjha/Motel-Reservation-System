@@ -3,6 +3,8 @@ package com.example.motels.service;
 
 import com.example.motels.model.MotelChain;
 import com.example.motels.repository.MotelChainRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,10 @@ public class MotelChainService {
 
     public List<MotelChain> getAllMotelChains() {
         return motelChainRepository.findAll();
+    }
+
+    public Page<MotelChain> getAllMotelChains(Pageable pageable) {
+        return motelChainRepository.findAll(pageable);
     }
 
     public Optional<MotelChain> getMotelChainById(UUID motelChainId) {
