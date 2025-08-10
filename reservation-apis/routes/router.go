@@ -9,7 +9,12 @@ import (
 func RegisterRoutes(r *gin.Engine) {
 	v1 := r.Group("/reservationApi/v1")
 	{
-		v1.GET("/price-list", controllers.GetPriceList)
+		v1.GET("/priceList", controllers.GetPriceList)
+		v1.POST("/priceList", controllers.PostPriceList)
+		v1.GET("/availableMotels", controllers.GetAvailableMotels)
+		v1.GET("/ping", controllers.Ping)
+		v1.GET("/health", controllers.Health)
+		v1.GET("/reservation", controllers.GetReservation)
 		v1.POST("/reservation", controllers.PostReservation)
 	}
 }
