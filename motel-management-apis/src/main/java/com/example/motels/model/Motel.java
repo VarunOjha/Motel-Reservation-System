@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -23,6 +24,9 @@ public class Motel {
     private String status;
     private String pincode;
     private String state;
+
+    @Embedded
+    private Geolocation geolocation;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -11,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func GetReservation(c *gin.Context) {
@@ -114,9 +116,24 @@ func PostReservation(c *gin.Context) {
 	}
 
 	// Check availability for the date range
+	// Parse check-in and check-out dates
+	checkInTime, err := time.Parse("2006-01-02", res.CheckIn)
+	if err != nil {
+		response := models.NewErrorResponse("400", "Invalid check_in date format. Use YYYY-MM-DD format")
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	checkOutTime, err := time.Parse("2006-01-02", res.CheckOut)
+	if err != nil {
+		response := models.NewErrorResponse("400", "Invalid check_out date format. Use YYYY-MM-DD format")
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
 	// Generate all dates between check-in and check-out (inclusive)
-	current := res.CheckIn
-	for current.Before(res.CheckOut) || current.Equal(res.CheckOut) {
+	current := checkInTime
+	for current.Before(checkOutTime) || current.Equal(checkOutTime) {
 		dateStr := current.Format("2006-01-02")
 
 		// Check availability for each date
@@ -154,8 +171,8 @@ func PostReservation(c *gin.Context) {
 	}
 
 	// Update room counts for all dates in the reservation range
-	current = res.CheckIn
-	for current.Before(res.CheckOut) || current.Equal(res.CheckOut) {
+	current = checkInTime
+	for current.Before(checkOutTime) || current.Equal(checkOutTime) {
 		dateStr := current.Format("2006-01-02")
 
 		// Find the record for this date
@@ -213,19 +230,23 @@ func PostReservation(c *gin.Context) {
 		current = current.AddDate(0, 0, 1)
 	}
 
-	// Set timestamps
+	// Set timestamps and initial version
 	now := time.Now()
 	res.CreatedAt = now
 	res.UpdatedAt = now
+	res.Version = 1 // Initial version for new reservation
 
-	// Save reservation
+	// Save reservation (MongoDB will auto-generate _id)
 	reservationsCollection := database.MotelDB.Collection("reservations")
-	_, err = reservationsCollection.InsertOne(ctx, res)
+	result, err := reservationsCollection.InsertOne(ctx, res)
 	if err != nil {
 		response := models.NewErrorResponse("500", "Could not save reservation")
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
+
+	// Set the generated ObjectId as the reservation ID
+	res.MotelReservationId = result.InsertedID.(primitive.ObjectID).Hex()
 
 	responseData := map[string]interface{}{
 		"message": "Reservation successful",
@@ -233,4 +254,84 @@ func PostReservation(c *gin.Context) {
 	}
 	response := models.NewApiResponse("201", responseData)
 	c.JSON(http.StatusCreated, response)
+}
+
+// UpdateReservation updates a reservation with automatic version increment
+func UpdateReservation(c *gin.Context) {
+	reservationID := c.Param("id")
+	if reservationID == "" {
+		response := models.NewErrorResponse("400", "Reservation ID is required")
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var updateData models.Reservation
+	if err := c.ShouldBindJSON(&updateData); err != nil {
+		response := models.NewErrorResponse("400", "Invalid input")
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	reservationsCollection := database.MotelDB.Collection("reservations")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Convert string ID to ObjectID
+	objectID, err := primitive.ObjectIDFromHex(reservationID)
+	if err != nil {
+		response := models.NewErrorResponse("400", "Invalid reservation ID format")
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Find the current reservation to get current version
+	filter := bson.M{"_id": objectID}
+	var currentReservation models.Reservation
+	err = reservationsCollection.FindOne(ctx, filter).Decode(&currentReservation)
+	if err != nil {
+		response := models.NewErrorResponse("404", "Reservation not found")
+		c.JSON(http.StatusNotFound, response)
+		return
+	}
+
+	// Create update document with version increment
+	update := bson.M{
+		"$set": bson.M{
+			"motel_id":                 updateData.MotelID,
+			"motel_name":               updateData.MotelName,
+			"motel_chain_id":           updateData.MotelChainID,
+			"motel_chain_name":         updateData.MotelChainName,
+			"latitude":                 updateData.Latitude,
+			"longitude":                updateData.Longitude,
+			"motel_room_category_id":   updateData.MotelRoomCategoryID,
+			"motel_room_category_name": updateData.MotelRoomCategoryName,
+			"total_price":              updateData.TotalPrice,
+			"status":                   updateData.Status,
+			"customer_name":            updateData.CustomerName,
+			"customer_email":           updateData.CustomerEmail,
+			"check_in":                 updateData.CheckIn,
+			"check_out":                updateData.CheckOut,
+			"updated_at":               time.Now(),
+		},
+		"$inc": bson.M{
+			"version": 1, // Increment version by 1
+		},
+	}
+
+	// Use findOneAndUpdate to get the updated document
+	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
+	var updatedReservation models.Reservation
+	err = reservationsCollection.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedReservation)
+	if err != nil {
+		response := models.NewErrorResponse("500", "Failed to update reservation")
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	responseData := map[string]interface{}{
+		"message": "Reservation updated successfully",
+		"data":    updatedReservation,
+	}
+	response := models.NewApiResponse("200", responseData)
+	c.JSON(http.StatusOK, response)
 }

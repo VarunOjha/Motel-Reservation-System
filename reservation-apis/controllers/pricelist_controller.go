@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func GetPriceList(c *gin.Context) {
@@ -94,7 +95,25 @@ func GetAvailableMotels(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cursor, err := collection.Find(ctx, map[string]interface{}{})
+	// Build query filter based on query parameters
+	filter := bson.M{}
+
+	// Check for date range parameters
+	if fromDate := c.Query("from_date"); fromDate != "" {
+		if filter["date"] == nil {
+			filter["date"] = bson.M{}
+		}
+		filter["date"].(bson.M)["$gte"] = fromDate
+	}
+
+	if toDate := c.Query("to_date"); toDate != "" {
+		if filter["date"] == nil {
+			filter["date"] = bson.M{}
+		}
+		filter["date"].(bson.M)["$lte"] = toDate
+	}
+
+	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		response := models.NewErrorResponse("500", "Cannot fetch available motels")
 		c.JSON(http.StatusInternalServerError, response)

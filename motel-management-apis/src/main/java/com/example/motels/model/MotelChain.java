@@ -1,6 +1,7 @@
 package com.example.motels.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
@@ -36,6 +37,9 @@ public class MotelChain {
     @JdbcTypeCode(SqlTypes.JSON) 
     @Column(columnDefinition = "jsonb")
     private ContactInfo contactInfo;
+
+    @Embedded
+    private Geolocation geolocation;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

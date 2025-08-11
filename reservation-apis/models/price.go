@@ -4,7 +4,11 @@ import "time"
 
 type MotelRoomPrice struct {
 	MotelID               string    `json:"motel_id" bson:"motel_id"`
+	MotelName             string    `json:"motel_name" bson:"motel_name"`
 	MotelChainID          string    `json:"motel_chain_id" bson:"motel_chain_id"`
+	MotelChainName        string    `json:"motel_chain_name" bson:"motel_chain_name"`
+	Latitude              string    `json:"latitude" bson:"latitude"`
+	Longitude             string    `json:"longitude" bson:"longitude"`
 	MotelRoomCategoryID   string    `json:"motel_room_category_id" bson:"motel_room_category_id"`
 	MotelRoomCategoryName string    `json:"room_type" bson:"motel_room_category_name"`
 	AvailableRoomCount    string    `json:"available_room_number" bson:"available_room_count"`
