@@ -12,6 +12,8 @@ func RegisterRoutes(r *gin.Engine) {
 		v1.GET("/priceList", controllers.GetPriceList)
 		v1.POST("/priceList", controllers.PostPriceList)
 		v1.GET("/availableMotels", controllers.GetAvailableMotels)
+		v1.GET("/getAllMotels", controllers.GetAllMotels)
+		v1.GET("/debugPrices", controllers.GetDebugMotelPrices)
 		v1.GET("/ping", controllers.Ping)
 		v1.GET("/health", controllers.Health)
 		v1.GET("/reservation", controllers.GetReservation)
