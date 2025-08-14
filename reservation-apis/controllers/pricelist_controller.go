@@ -88,27 +88,3 @@ func PostPriceList(c *gin.Context) {
 	response := models.NewApiResponse("201", responseData)
 	c.JSON(http.StatusCreated, response)
 }
-
-func GetAvailableMotels(c *gin.Context) {
-	collection := database.MotelDB.Collection("prices")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	cursor, err := collection.Find(ctx, map[string]interface{}{})
-	if err != nil {
-		response := models.NewErrorResponse("500", "Cannot fetch available motels")
-		c.JSON(http.StatusInternalServerError, response)
-		return
-	}
-	defer cursor.Close(ctx)
-
-	var prices []models.MotelRoomPrice
-	if err := cursor.All(ctx, &prices); err != nil {
-		response := models.NewErrorResponse("500", "Error parsing available motels data")
-		c.JSON(http.StatusInternalServerError, response)
-		return
-	}
-
-	response := models.NewApiResponse("200", prices)
-	c.JSON(http.StatusOK, response)
-}
