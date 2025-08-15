@@ -1,16 +1,11 @@
+# app/http.py
+from __future__ import annotations
+from typing import Any, Dict, Optional, Callable
 import time
 import requests
-from typing import Dict, Any, Optional
-from datetime import datetime
 
-def env_bool(val: Optional[str]) -> bool:
-    return str(val or "").strip().lower() in {"1", "true", "yes", "y", "on"}
-
-def iso_date(d: datetime) -> str:
-    return d.date().isoformat()
-
-def _retry_loop(fn, max_retries: int, backoff: float):
-    last_exc = None
+def _retry(fn: Callable[[], requests.Response], max_retries: int, backoff: float) -> requests.Response:
+    last_exc: Optional[Exception] = None
     for attempt in range(1, max_retries + 1):
         try:
             return fn()
@@ -19,16 +14,15 @@ def _retry_loop(fn, max_retries: int, backoff: float):
             if attempt == max_retries:
                 break
             time.sleep(backoff * attempt)
+    assert last_exc is not None
     raise last_exc
 
 def http_get(url: str, params: Dict[str, Any], headers: Dict[str, str],
              timeout: float, max_retries: int, backoff: float) -> requests.Response:
-    def do():
-        return requests.get(url, params=params, headers=headers, timeout=timeout)
-    return _retry_loop(do, max_retries, backoff)
+    return _retry(lambda: requests.get(url, params=params, headers=headers, timeout=timeout),
+                  max_retries, backoff)
 
 def http_post(url: str, json: Dict[str, Any], headers: Dict[str, str],
               timeout: float, max_retries: int, backoff: float) -> requests.Response:
-    def do():
-        return requests.post(url, json=json, headers=headers, timeout=timeout)
-    return _retry_loop(do, max_retries, backoff)
+    return _retry(lambda: requests.post(url, json=json, headers=headers, timeout=timeout),
+                  max_retries, backoff)
