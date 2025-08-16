@@ -266,3 +266,40 @@ func GetDebugMotelPrices(c *gin.Context) {
 	response := models.NewApiResponse("200", results)
 	c.JSON(http.StatusOK, response)
 }
+
+// GetAllMotelCount - Get count of records from all collections/tables
+func GetAllReservations(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// MongoDB collections count
+	pricesCollection := database.MotelDB.Collection("prices")
+	reservationsCollection := database.MotelDB.Collection("reservations")
+
+	pricesCount, err := pricesCollection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		response := models.NewErrorResponse("500", "Cannot count prices: "+err.Error())
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	reservationsCount, err := reservationsCollection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		response := models.NewErrorResponse("500", "Cannot count reservations: "+err.Error())
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	// Build response with all counts
+	counts := map[string]interface{}{
+		"mongodb_collections": map[string]interface{}{
+			"prices":       pricesCount,
+			"reservations": reservationsCount,
+		},
+		"total_mongodb_records": pricesCount + reservationsCount,
+		"note":                  "PostgreSQL tables (motel_chains, motels, room_categories, rooms) are managed by the Java motel-management-apis service",
+	}
+
+	response := models.NewApiResponse("200", counts)
+	c.JSON(http.StatusOK, response)
+}

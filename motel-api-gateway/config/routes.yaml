@@ -1,13 +1,46 @@
 routes:
-  - path: "/motelApi/v1/motels/chains"
+  - path: "/motelApi/v1/allMotels"
     upstream: "http://motel-management-apis:8085"
     rate_limit: 100
-  - path: "/motelApi/v1/motels/chain/{motelChainId}/motels"
+  - path: "/motelApi/v1/allMotels/count"
     upstream: "http://motel-management-apis:8085"
     rate_limit: 100
   - path: "/motelApi/v1/ping"
     upstream: "http://motel-management-apis:8085"
     rate_limit: 100
-  - path: "/motelApi/v1/allmotels"
+  - path: "/motelApi/v1/motelChains"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/motelApi/v1/motels"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/motelApi/v1/motelRoomCategories"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/motelApi/v1/motelRooms"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/reservationApi/v1/priceList"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/reservationApi/v1/availableMotels"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/reservationApi/v1/getAllReservations"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/reservationApi/v1/allMotels"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/reservationApi/v1/ping"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/reservationApi/v1/health"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/reservationApi/v1/reservation"
+    upstream: "http://motel-management-apis:8085"
+    rate_limit: 100
+  - path: "/reservationApi/v1/manage"
     upstream: "http://motel-management-apis:8085"
     rate_limit: 100
