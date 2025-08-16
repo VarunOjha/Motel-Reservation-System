@@ -19,5 +19,6 @@ func RegisterRoutes(r *gin.Engine) {
 		v1.GET("/health", controllers.Health)
 		v1.GET("/reservation", controllers.GetReservation)
 		v1.POST("/reservation", controllers.PostReservation)
+		v1.GET("/allbookings", controllers.GetAllBookings)
 	}
 }
