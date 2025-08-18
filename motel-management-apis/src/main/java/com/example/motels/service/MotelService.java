@@ -52,6 +52,12 @@ public class MotelService {
         return motelRepository.findById(motelId);
     }
 
+    public Optional<Motel> findByMotelChainIdAndMotelNameAndPincodeAndState(
+            String motelChainId, String motelName, String pincode, String state) {
+        return motelRepository.findByMotelChainIdAndMotelNameAndPincodeAndState(
+                motelChainId, motelName, pincode, state);
+    }
+
     public Motel createMotel(Motel motel) {
         return motelRepository.save(motel);
     }

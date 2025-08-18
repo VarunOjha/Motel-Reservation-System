@@ -45,9 +45,11 @@ async fn main() {
                             if limiter.check(&rate_limit_key, route.rate_limit) {
                                 return proxy::proxy(req, route).await;
                             } else {
+                                let json_response = r#"{"response": {"http_code": "429", "message": "too many requests"}}"#;
                                 return Ok(Response::builder()
                                     .status(429)
-                                    .body(Body::from("Rate limit exceeded"))
+                                    .header("content-type", "application/json")
+                                    .body(Body::from(json_response))
                                     .unwrap());
                             }
                         }

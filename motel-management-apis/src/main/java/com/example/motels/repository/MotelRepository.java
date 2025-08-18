@@ -4,6 +4,7 @@ import com.example.motels.model.Motel;
 
 import java.util.UUID;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +26,7 @@ public interface MotelRepository extends JpaRepository<Motel, UUID> {
             @Param("status") String status,
             @Param("pincode") String pincode,
             @Param("state") String state);
+
+    Optional<Motel> findByMotelChainIdAndMotelNameAndPincodeAndState(String motelChainId, String motelName, String pincode,
+              String state);
 }
