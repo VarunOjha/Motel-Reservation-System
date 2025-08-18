@@ -112,14 +112,39 @@ public class MotelController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Motel>> createMotel(@RequestBody Motel motel) {
-        // Validate that motelChainId is provided in the payload
+        // Validate that required fields are provided in the payload
         if (motel.getMotelChainId() == null || motel.getMotelChainId().trim().isEmpty()) {
-            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null);
+            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null, "motelChainId is required and cannot be empty");
             return ResponseEntity.badRequest().body(errorResponse);
         }
         
+        if (motel.getMotelName() == null || motel.getMotelName().trim().isEmpty()) {
+            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null, "motelName is required and cannot be empty");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        if (motel.getPincode() == null || motel.getPincode().trim().isEmpty()) {
+            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null, "pincode is required and cannot be empty");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        if (motel.getState() == null || motel.getState().trim().isEmpty()) {
+            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null, "state is required and cannot be empty");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        // Check if motel already exists with the same motelChainId, motelName, pincode, and state
+        Optional<Motel> existingMotel = motelService.findByMotelChainIdAndMotelNameAndPincodeAndState(
+            motel.getMotelChainId(), motel.getMotelName(), motel.getPincode(), motel.getState());
+        
+        if (existingMotel.isPresent()) {
+            // Return existing motel with 201 code
+            ApiResponse<Motel> response = new ApiResponse<>("201", existingMotel.get(), "Motel already exists");
+            return ResponseEntity.status(201).body(response);
+        }
+        
         Motel createdMotel = motelService.createMotel(motel);
-        ApiResponse<Motel> response = new ApiResponse<>("201", createdMotel);
+        ApiResponse<Motel> response = new ApiResponse<>("201", createdMotel, "Motel created successfully");
         return ResponseEntity.status(201).body(response);
     }
 
