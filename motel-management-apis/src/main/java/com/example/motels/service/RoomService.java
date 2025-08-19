@@ -77,6 +77,12 @@ public class RoomService {
         return roomRepository.findByRoomIdAndMotelChainIdAndMotelId(roomId, motelChainId, motelId);
     }
 
+    public Optional<Room> findByMotelIdAndMotelChainIdAndMotelRoomCategoryIdAndRoomNumber(
+            UUID motelId, UUID motelChainId, UUID motelRoomCategoryId, String roomNumber) {
+        return roomRepository.findByMotelIdAndMotelChainIdAndMotelRoomCategoryIdAndRoomNumber(
+                motelId, motelChainId, motelRoomCategoryId, roomNumber);
+    }
+
     public Room createRoom(Room room) {
         return roomRepository.save(room);
     }

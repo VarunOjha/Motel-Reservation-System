@@ -57,7 +57,7 @@ class PricePublisher(Job):
     def _fetch_all_rooms(self) -> List[Dict[str, Any]]:
         rooms: List[Dict[str, Any]] = []
         page = 0
-        while True:
+        while page < 500:
             params = {"page": page, "size": self.page_size}
             jlog(self.log, event="fetch_rooms_page", page=page, size=self.page_size, url=self.get_rooms_url)
 

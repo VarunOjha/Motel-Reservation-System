@@ -4,6 +4,8 @@ import com.example.motels.model.RoomCategory;
 import com.example.motels.repository.RoomCategoryRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,6 +50,32 @@ public class RoomCategoryService {
         }
         
         return roomCategoryRepository.findAll();
+    }
+
+    public Page<RoomCategory> getAllRoomCategoriesWithFilters(UUID motelId, UUID motelChainId, String status, Pageable pageable) {
+        // If no filters provided, return all with pagination
+        if (motelId == null && motelChainId == null && status == null) {
+            return roomCategoryRepository.findAll(pageable);
+        }
+        
+        // Apply filters based on provided parameters with pagination
+        if (motelId != null && motelChainId != null && status != null) {
+            return roomCategoryRepository.findByMotelIdAndMotelChainIdAndStatus(motelId, motelChainId, status, pageable);
+        } else if (motelId != null && motelChainId != null) {
+            return roomCategoryRepository.findByMotelIdAndMotelChainId(motelId, motelChainId, pageable);
+        } else if (motelId != null && status != null) {
+            return roomCategoryRepository.findByMotelIdAndStatus(motelId, status, pageable);
+        } else if (motelChainId != null && status != null) {
+            return roomCategoryRepository.findByMotelChainIdAndStatus(motelChainId, status, pageable);
+        } else if (motelId != null) {
+            return roomCategoryRepository.findByMotelId(motelId, pageable);
+        } else if (motelChainId != null) {
+            return roomCategoryRepository.findByMotelChainId(motelChainId, pageable);
+        } else if (status != null) {
+            return roomCategoryRepository.findByStatus(status, pageable);
+        }
+        
+        return roomCategoryRepository.findAll(pageable);
     }
 
     public Optional<RoomCategory> getRoomCategoryById(UUID roomCategoryId) {

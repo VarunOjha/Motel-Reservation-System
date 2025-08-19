@@ -13,6 +13,7 @@ import com.example.motels.model.PaginatedResponse;
 import com.example.motels.service.RoomService;
 import com.example.motels.model.Room;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -130,13 +131,33 @@ public class RoomController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
         
+        if (room.getMotelRoomCategoryId() == null) {
+            ApiResponse<Room> errorResponse = new ApiResponse<>("400", null, "motelRoomCategoryId is required in the payload");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
+        if (room.getRoomNumber() == null || room.getRoomNumber().trim().isEmpty()) {
+            ApiResponse<Room> errorResponse = new ApiResponse<>("400", null, "roomNumber is required and cannot be empty");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+        
         if (room.getStatus() == null || room.getStatus().trim().isEmpty()) {
             ApiResponse<Room> errorResponse = new ApiResponse<>("400", null, "status is required and cannot be empty");
             return ResponseEntity.badRequest().body(errorResponse);
         }
         
+        // Check if room already exists with the same motelId, motelChainId, motelRoomCategoryId, and roomNumber
+        Optional<Room> existingRoom = roomService.findByMotelIdAndMotelChainIdAndMotelRoomCategoryIdAndRoomNumber(
+            room.getMotelId(), room.getMotelChainId(), room.getMotelRoomCategoryId(), room.getRoomNumber());
+        
+        if (existingRoom.isPresent()) {
+            // Return existing room with 201 code
+            ApiResponse<Room> response = new ApiResponse<>("201", existingRoom.get(), "Room already exists");
+            return ResponseEntity.status(201).body(response);
+        }
+        
         Room createdRoom = roomService.createRoom(room);
-        ApiResponse<Room> response = new ApiResponse<>("201", createdRoom);
+        ApiResponse<Room> response = new ApiResponse<>("201", createdRoom, "Room created successfully");
         return ResponseEntity.status(201).body(response);
     }
 
