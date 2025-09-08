@@ -1,0 +1,18 @@
+config:
+  clients:
+    - url: http://loki.motel-cluster.svc.cluster.local:3100/loki/api/v1/push
+  snippets:
+    pipelineStages:
+      - cri: {}
+      - docker: {}
+      - labeldrop:
+          - filename
+
+extraArgs:
+  - -client.external-labels=cluster=motel-cluster-dev
+
+tolerations:
+  - operator: Exists
+
+rbac:
+  pspEnabled: false

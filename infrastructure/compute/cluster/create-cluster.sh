@@ -7,7 +7,7 @@ set -euo pipefail
 CONFIG_FILE="${1:-Cluster-config.yaml}"
 NAMESPACE="${2:-motel-cluster}"
 # If you pass a kubeconfig path, we'll use it; otherwise timestamped file.
-KUBECONFIG_OUT="${3:-./kubeconfig-$(date +%Y%m%d-%H%M%S)}"
+KUBECONFIG_OUT="${3:-./kubeconfig-motel-$(date +%Y%m%d)}"
 
 echo "Creating EKS cluster from config: $CONFIG_FILE ..."
 eksctl create cluster -f "$CONFIG_FILE" --kubeconfig "$KUBECONFIG_OUT"

@@ -47,9 +47,28 @@ func generateUniqueReservationID(ctx context.Context, collection *mongo.Collecti
 }
 
 func GetReservation(c *gin.Context) {
+	// Log all query parameters for debugging
+	fmt.Printf("DEBUG: Full URL: %s\n", c.Request.URL.String())
+	fmt.Printf("DEBUG: Raw query: %s\n", c.Request.URL.RawQuery)
+	fmt.Printf("DEBUG: All query params: %v\n", c.Request.URL.Query())
+
 	// Get required query parameters
 	motelID := c.Query("motel_id")
 	motelChainID := c.Query("motel_chain_id")
+
+	// Try alternative methods if c.Query() fails
+	if motelID == "" {
+		motelID = c.Request.URL.Query().Get("motel_id")
+		fmt.Printf("DEBUG: Alternative method - motel_id: '%s'\n", motelID)
+	}
+	if motelChainID == "" {
+		motelChainID = c.Request.URL.Query().Get("motel_chain_id")
+		fmt.Printf("DEBUG: Alternative method - motel_chain_id: '%s'\n", motelChainID)
+	}
+
+	// Log extracted parameters
+	fmt.Printf("DEBUG: Final motel_id: '%s'\n", motelID)
+	fmt.Printf("DEBUG: Final motel_chain_id: '%s'\n", motelChainID)
 
 	// Validate required parameters
 	if motelID == "" {
