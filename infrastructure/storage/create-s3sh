@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+
+export AWS_REGION="${AWS_REGION:-us-west-2}"
+export CLUSTER_NAME="${CLUSTER_NAME:-motel-cluster-dev}"
+export NAMESPACE="${NAMESPACE:-motel-cluster}"
+# Bucket must be globally unique; suffix a timestamp to avoid collisions.
+export BUCKET_NAME="${BUCKET_NAME:-motel-dev-loki-logs-$(date +%Y%m%d%H%M%S)}"
+
+# Helm release names
+export LOKI_RELEASE="${LOKI_RELEASE:-loki}"
+export PROMTAIL_RELEASE="${PROMTAIL_RELEASE:-promtail}"
+export KPS_RELEASE="${KPS_RELEASE:-kps}"  # your kube-prometheus-stack release name
+
+# StorageClass for Loki's small local cache PVC
+export STORAGE_CLASS="${STORAGE_CLASS:-gp3}"
+
+: "${BUCKET_NAME:?BUCKET_NAME not set}"
+: "${AWS_REGION:?AWS_REGION not set}"
+
+if aws s3 ls "s3://$BUCKET_NAME" >/dev/null 2>&1; then
+  echo "S3 bucket $BUCKET_NAME already exists; skipping create."
+else
+  echo "Creating S3 bucket: $BUCKET_NAME in $AWS_REGION"
+  if [ "$AWS_REGION" = "us-east-1" ]; then
+    aws s3api create-bucket --bucket "$BUCKET_NAME"
+  else
+    aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$AWS_REGION" \
+      --create-bucket-configuration LocationConstraint="$AWS_REGION"
+  fi
+fi
+
+echo "Enabling default SSE (AES256) ..."
+aws s3api put-bucket-encryption --bucket "$BUCKET_NAME" \
+  --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+
+echo "Enabling versioning ..."
+aws s3api put-bucket-versioning --bucket "$BUCKET_NAME" \
+  --versioning-configuration Status=Enabled
+
+echo "Applying 30-day lifecycle to prefix 'loki/' ..."
+cat > /tmp/lifecycle.json <<'JSON'
+{
+  "Rules": [
+    {
+      "ID": "expire-chunks",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "loki/" },
+      "Expiration": { "Days": 30 },
+      "NoncurrentVersionExpiration": { "NoncurrentDays": 30 }
+    }
+  ]
+}
+JSON
+aws s3api put-bucket-lifecycle-configuration --bucket "$BUCKET_NAME" --lifecycle-configuration file:///tmp/lifecycle.json
+
+echo "✅ S3 ready: s3://$BUCKET_NAME"

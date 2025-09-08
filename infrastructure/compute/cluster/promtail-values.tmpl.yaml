@@ -1,0 +1,18 @@
+config:
+  clients:
+    - url: http://${LOKI_RELEASE}.${NAMESPACE}.svc.cluster.local:3100/loki/api/v1/push
+  snippets:
+    pipelineStages:
+      - cri: {}
+      - docker: {}
+      - labeldrop:
+          - filename
+
+extraArgs:
+  - -client.external-labels=cluster=${CLUSTER_NAME}
+
+tolerations:
+  - operator: Exists
+
+rbac:
+  pspEnabled: false

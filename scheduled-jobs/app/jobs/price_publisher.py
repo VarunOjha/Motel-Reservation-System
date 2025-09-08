@@ -57,7 +57,8 @@ class PricePublisher(Job):
     def _fetch_all_rooms(self) -> List[Dict[str, Any]]:
         rooms: List[Dict[str, Any]] = []
         page = 0
-        while page < 500:
+        total_pages = 1
+        while page < total_pages:
             params = {"page": page, "size": self.page_size}
             jlog(self.log, event="fetch_rooms_page", page=page, size=self.page_size, url=self.get_rooms_url)
 
@@ -71,10 +72,14 @@ class PricePublisher(Job):
 
             rooms.extend(content)
             is_last = bool(pagination.get("is_last", pagination.get("last", False)))
-            jlog(self.log, event="page_summary", page=pagination.get("page", page),
-                 received=len(content), accumulated=len(rooms), last=is_last)
+            total_pages = pagination.get("total_pages", pagination.get("totalPages", 0))
+            current_page = pagination.get("page", page)
+            
+            jlog(self.log, event="page_summary", page=current_page,
+                 received=len(content), accumulated=len(rooms), last=is_last, 
+                 total_pages=total_pages)
 
-            if is_last or not content:
+            if is_last or not content or (total_pages > 0 and current_page >= total_pages - 1):
                 break
             page += 1
         return rooms
