@@ -20,6 +20,6 @@ echo "Waiting 2 seconds before building Docker image..."
 sleep 2
 
 echo "Starting Docker Compose with build..."
-docker-compose up --build
+docker compose up --build
 
 echo "Docker Compose command finished."

@@ -8,7 +8,7 @@ import (
 )
 
 func AddRoomsToMotel(motelRoomCategoriesMapping []motelclient.MotelRoomCategory) {
-	baseUrl := "http://a85a9798b265f437f9c79edf50d2f68d-1226124390.us-west-2.elb.amazonaws.com/motelApi/v1/motels/chains"
+	baseUrl := "http://localhost:8085/motelApi/v1/motelChains"
 
 	for _, motelRoomCategories := range motelRoomCategoriesMapping {
 		motelChainId := motelRoomCategories.MotelChainID

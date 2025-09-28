@@ -10,6 +10,11 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017
       - MONGO_DB=motel
+    networks:
+      default:
+      motel-shared-network:
+        aliases:
+          - reservation-apis
 
   mongo:
     image: mongo:latest
@@ -20,3 +25,7 @@ services:
 
 volumes:
   mongo_data:
+
+networks:
+  motel-shared-network:
+    external: true

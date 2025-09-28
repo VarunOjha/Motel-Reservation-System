@@ -29,10 +29,15 @@ services:
       SPRING_DATASOURCE_USERNAME: moteluser
       SPRING_DATASOURCE_PASSWORD: motelpass
     networks:
-      - motel-network
+      motel-network:
+      motel-shared-network:
+        aliases:
+          - motel-management-apis
 
 volumes:
   motel_pgdata:
 
 networks:
   motel-network:
+  motel-shared-network:
+    external: true

@@ -8,7 +8,7 @@ import (
 )
 
 func AddMotelsToMotelChains() []motelclient.MotelIDs {
-	getMotelChainsApi := "http://a85a9798b265f437f9c79edf50d2f68d-1226124390.us-west-2.elb.amazonaws.com/motelApi/v1/motels/chains"
+	getMotelChainsApi := "http://localhost:8085/motelApi/v1/motelChains"
 	motelSeedJsonPath := "resources/motel.json"
 
 	var motelMappings []motelclient.MotelIDs
@@ -26,10 +26,22 @@ func AddMotelsToMotelChains() []motelclient.MotelIDs {
 	}
 
 	body := motelclient.Get(getMotelChainsApi)
-	var motelChains []motelclient.MotelChain
-	if err := json.Unmarshal(body, &motelChains); err != nil {
-		fmt.Printf("failed to parse JSON response: %v\n", err)
+
+	// Parse the wrapped API response
+	var apiResponse struct {
+		Response struct {
+			Data struct {
+				Content []motelclient.MotelChain `json:"content"`
+			} `json:"data"`
+		} `json:"response"`
 	}
+
+	if err := json.Unmarshal(body, &apiResponse); err != nil {
+		fmt.Printf("failed to parse JSON response: %v\n", err)
+		return nil
+	}
+
+	motelChains := apiResponse.Response.Data.Content
 
 	var motelChainIds []string
 	for _, motelChains := range motelChains {

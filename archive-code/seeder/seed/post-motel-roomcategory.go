@@ -8,7 +8,7 @@ import (
 )
 
 func AddRoomCategoryToMotel(motelIDs []motelclient.MotelIDs) []motelclient.MotelRoomCategory {
-	baseUrl := "http://a85a9798b265f437f9c79edf50d2f68d-1226124390.us-west-2.elb.amazonaws.com/motelApi/v1/motels/chains"
+	baseUrl := "http://localhost:8085/motelApi/v1/motelChains"
 	roomCategorySeedJsonPath := "resources/motel-room-category.json"
 	var motelRoomCategoryResult []motelclient.MotelRoomCategory
 

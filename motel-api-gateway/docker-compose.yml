@@ -12,6 +12,9 @@ services:
       - ./config:/app/config
     networks:
       - monitoring
+      - motel-shared-network
 
 networks:
   monitoring:
+  motel-shared-network:
+    external: true
