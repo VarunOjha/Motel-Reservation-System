@@ -1,12 +1,18 @@
 package com.example.motels.service;
 
+import com.example.motels.dto.mapper.MotelChainMapper;
+import com.example.motels.dto.request.AddressRequest;
+import com.example.motels.dto.request.ContactInfoRequest;
+import com.example.motels.dto.request.CreateMotelChainRequest;
+import com.example.motels.dto.request.UpdateMotelChainRequest;
+import com.example.motels.exception.DuplicateResourceException;
+import com.example.motels.exception.ResourceNotFoundException;
 import com.example.motels.model.Address;
 import com.example.motels.model.ContactInfo;
 import com.example.motels.model.MotelChain;
 import com.example.motels.repository.MotelChainRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,332 +29,404 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for MotelChainService.
+ * Tests business logic with mocked repository.
+ * 
+ * Uses Mockito to mock dependencies.
+ * Service returns entities (not DTOs) - controller handles DTO conversion.
+ */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MotelChainService Tests")
 class MotelChainServiceTest {
 
     @Mock
-    private MotelChainRepository motelChainRepository;
+    private MotelChainRepository repository;
+
+    @Mock
+    private MotelChainMapper mapper;
 
     @InjectMocks
-    private MotelChainService motelChainService;
+    private MotelChainService service;
 
-    private MotelChain testMotelChain;
     private UUID testId;
-    private Address testAddress;
-    private ContactInfo testContactInfo;
+    private MotelChain testEntity;
+    private CreateMotelChainRequest createRequest;
+    private UpdateMotelChainRequest updateRequest;
 
     @BeforeEach
     void setUp() {
         testId = UUID.randomUUID();
-        
-        testAddress = new Address();
-        testAddress.setAddressLine1("123 Main St");
-        testAddress.setAddressLine2("Suite 100");
-        testAddress.setLandmark("Near Central Park");
-        testAddress.setAddressName("Main Office");
-        testAddress.setStatus("ACTIVE");
-        
-        testContactInfo = new ContactInfo();
-        testContactInfo.setPhoneNumber("123-456-7890");
-        testContactInfo.setEmail("test@example.com");
-        testContactInfo.setContactName("John Doe");
-        testContactInfo.setContactPosition("Manager");
-        testContactInfo.setContactType("PRIMARY");
-        testContactInfo.setContactDescription("Main contact for operations");
-        testContactInfo.setStatus("ACTIVE");
-        
-        testMotelChain = new MotelChain();
-        testMotelChain.setMotelChainId(testId);
-        testMotelChain.setMotelChainName("Test Motel Chain");
-        testMotelChain.setDisplayName("Test Display Name");
-        testMotelChain.setState("California");
-        testMotelChain.setPincode("90210");
-        testMotelChain.setStatus("ACTIVE");
-        testMotelChain.setAddress(testAddress);
-        testMotelChain.setContactInfo(testContactInfo);
-        testMotelChain.setCreatedAt(LocalDateTime.now());
-        testMotelChain.setUpdatedAt(LocalDateTime.now());
+        testEntity = createSampleEntity(testId);
+        createRequest = createSampleCreateRequest();
+        updateRequest = createSampleUpdateRequest();
     }
 
-    @Nested
-    @DisplayName("Get All Motel Chains Tests")
-    class GetAllMotelChainsTests {
+    // ========== CREATE Tests ==========
 
-        @Test
-        @DisplayName("Should return all motel chains when repository contains data")
-        void shouldReturnAllMotelChains() {
-            // Given
-            List<MotelChain> expectedChains = Arrays.asList(testMotelChain, createAnotherMotelChain());
-            when(motelChainRepository.findAll()).thenReturn(expectedChains);
-
-            // When
-            List<MotelChain> actualChains = motelChainService.getAllMotelChains();
-
-            // Then
-            assertThat(actualChains).hasSize(2);
-            assertThat(actualChains).containsExactlyElementsOf(expectedChains);
-            verify(motelChainRepository, times(1)).findAll();
-        }
-
-        @Test
-        @DisplayName("Should return empty list when no motel chains exist")
-        void shouldReturnEmptyListWhenNoMotelChainsExist() {
-            // Given
-            when(motelChainRepository.findAll()).thenReturn(Arrays.asList());
-
-            // When
-            List<MotelChain> actualChains = motelChainService.getAllMotelChains();
-
-            // Then
-            assertThat(actualChains).isEmpty();
-            verify(motelChainRepository, times(1)).findAll();
-        }
-
-        @Test
-        @DisplayName("Should return paginated motel chains")
-        void shouldReturnPaginatedMotelChains() {
-            // Given
-            Pageable pageable = PageRequest.of(0, 2);
-            List<MotelChain> chains = Arrays.asList(testMotelChain, createAnotherMotelChain());
-            Page<MotelChain> expectedPage = new PageImpl<>(chains, pageable, 2);
-            when(motelChainRepository.findAll(pageable)).thenReturn(expectedPage);
-
-            // When
-            Page<MotelChain> actualPage = motelChainService.getAllMotelChains(pageable);
-
-            // Then
-            assertThat(actualPage.getContent()).hasSize(2);
-            assertThat(actualPage.getTotalElements()).isEqualTo(2);
-            assertThat(actualPage.getNumber()).isEqualTo(0);
-            verify(motelChainRepository, times(1)).findAll(pageable);
-        }
-    }
-
-    @Nested
-    @DisplayName("Get Motel Chain By ID Tests")
-    class GetMotelChainByIdTests {
-
-        @Test
-        @DisplayName("Should return motel chain when ID exists")
-        void shouldReturnMotelChainWhenIdExists() {
-            // Given
-            when(motelChainRepository.findById(testId)).thenReturn(Optional.of(testMotelChain));
-
-            // When
-            Optional<MotelChain> result = motelChainService.getMotelChainById(testId);
-
-            // Then
-            assertThat(result).isPresent();
-            assertThat(result.get()).isEqualTo(testMotelChain);
-            verify(motelChainRepository, times(1)).findById(testId);
-        }
-
-        @Test
-        @DisplayName("Should return empty when ID does not exist")
-        void shouldReturnEmptyWhenIdDoesNotExist() {
-            // Given
-            UUID nonExistentId = UUID.randomUUID();
-            when(motelChainRepository.findById(nonExistentId)).thenReturn(Optional.empty());
-
-            // When
-            Optional<MotelChain> result = motelChainService.getMotelChainById(nonExistentId);
-
-            // Then
-            assertThat(result).isEmpty();
-            verify(motelChainRepository, times(1)).findById(nonExistentId);
-        }
-    }
-
-    @Nested
-    @DisplayName("Create Motel Chain Tests")
-    class CreateMotelChainTests {
-
-        @Test
-        @DisplayName("Should create new motel chain when unique combination")
-        void shouldCreateNewMotelChainWhenUniqueCombination() {
-            // Given
-            when(motelChainRepository.existsByMotelChainNameAndPincodeAndState(
-                    testMotelChain.getMotelChainName(),
-                    testMotelChain.getPincode(),
-                    testMotelChain.getState()
-            )).thenReturn(false);
-            when(motelChainRepository.save(testMotelChain)).thenReturn(testMotelChain);
-
-            // When
-            MotelChain result = motelChainService.createMotelChain(testMotelChain);
-
-            // Then
-            assertThat(result).isEqualTo(testMotelChain);
-            verify(motelChainRepository, times(1)).existsByMotelChainNameAndPincodeAndState(
-                    testMotelChain.getMotelChainName(),
-                    testMotelChain.getPincode(),
-                    testMotelChain.getState()
-            );
-            verify(motelChainRepository, times(1)).save(testMotelChain);
-            verify(motelChainRepository, never()).getByMotelChainNameAndPincodeAndState(anyString(), anyString(), anyString());
-        }
-
-        @Test
-        @DisplayName("Should return existing motel chain when duplicate combination")
-        void shouldReturnExistingMotelChainWhenDuplicateCombination() {
-            // Given
-            MotelChain existingChain = createAnotherMotelChain();
-            when(motelChainRepository.existsByMotelChainNameAndPincodeAndState(
-                    testMotelChain.getMotelChainName(),
-                    testMotelChain.getPincode(),
-                    testMotelChain.getState()
-            )).thenReturn(true);
-            when(motelChainRepository.getByMotelChainNameAndPincodeAndState(
-                    testMotelChain.getMotelChainName(),
-                    testMotelChain.getPincode(),
-                    testMotelChain.getState()
-            )).thenReturn(existingChain);
-
-            // When
-            MotelChain result = motelChainService.createMotelChain(testMotelChain);
-
-            // Then
-            assertThat(result).isEqualTo(existingChain);
-            verify(motelChainRepository, times(1)).existsByMotelChainNameAndPincodeAndState(
-                    testMotelChain.getMotelChainName(),
-                    testMotelChain.getPincode(),
-                    testMotelChain.getState()
-            );
-            verify(motelChainRepository, never()).save(any(MotelChain.class));
-            verify(motelChainRepository, times(1)).getByMotelChainNameAndPincodeAndState(
-                    testMotelChain.getMotelChainName(),
-                    testMotelChain.getPincode(),
-                    testMotelChain.getState()
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Update Motel Chain Tests")
-    class UpdateMotelChainTests {
-
-        @Test
-        @DisplayName("Should update existing motel chain successfully")
-        void shouldUpdateExistingMotelChainSuccessfully() {
-            // Given
-            MotelChain updatedDetails = new MotelChain();
-            updatedDetails.setMotelChainName("Updated Chain Name");
-            updatedDetails.setDisplayName("Updated Display Name");
-            updatedDetails.setState("Updated State");
-            updatedDetails.setPincode("54321");
-            updatedDetails.setStatus("INACTIVE");
-            updatedDetails.setAddress(testAddress);
-            updatedDetails.setContactInfo(testContactInfo);
-
-            when(motelChainRepository.findById(testId)).thenReturn(Optional.of(testMotelChain));
-            when(motelChainRepository.save(any(MotelChain.class))).thenReturn(testMotelChain);
-
-            // When
-            MotelChain result = motelChainService.updateMotelChain(testId, updatedDetails);
-
-            // Then
-            assertThat(result.getMotelChainName()).isEqualTo("Updated Chain Name");
-            assertThat(result.getDisplayName()).isEqualTo("Updated Display Name");
-            assertThat(result.getState()).isEqualTo("Updated State");
-            assertThat(result.getPincode()).isEqualTo("54321");
-            assertThat(result.getStatus()).isEqualTo("INACTIVE");
-            verify(motelChainRepository, times(1)).findById(testId);
-            verify(motelChainRepository, times(1)).save(testMotelChain);
-        }
-
-        @Test
-        @DisplayName("Should throw exception when motel chain not found for update")
-        void shouldThrowExceptionWhenMotelChainNotFoundForUpdate() {
-            // Given
-            UUID nonExistentId = UUID.randomUUID();
-            MotelChain updatedDetails = new MotelChain();
-            when(motelChainRepository.findById(nonExistentId)).thenReturn(Optional.empty());
-
-            // When & Then
-            assertThatThrownBy(() -> motelChainService.updateMotelChain(nonExistentId, updatedDetails))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessage("MotelChain not found");
-
-            verify(motelChainRepository, times(1)).findById(nonExistentId);
-            verify(motelChainRepository, never()).save(any(MotelChain.class));
-        }
-    }
-
-    @Nested
-    @DisplayName("Delete Motel Chain Tests")
-    class DeleteMotelChainTests {
-
-        @Test
-        @DisplayName("Should delete existing motel chain successfully")
-        void shouldDeleteExistingMotelChainSuccessfully() {
-            // Given
-            when(motelChainRepository.existsById(testId)).thenReturn(true);
-            doNothing().when(motelChainRepository).deleteById(testId);
-
-            // When
-            Boolean result = motelChainService.deleteMotelChain(testId);
-
-            // Then
-            assertThat(result).isTrue();
-            verify(motelChainRepository, times(1)).existsById(testId);
-            verify(motelChainRepository, times(1)).deleteById(testId);
-        }
-
-        @Test
-        @DisplayName("Should return false when motel chain does not exist for deletion")
-        void shouldReturnFalseWhenMotelChainDoesNotExistForDeletion() {
-            // Given
-            UUID nonExistentId = UUID.randomUUID();
-            when(motelChainRepository.existsById(nonExistentId)).thenReturn(false);
-
-            // When
-            Boolean result = motelChainService.deleteMotelChain(nonExistentId);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(motelChainRepository, times(1)).existsById(nonExistentId);
-            verify(motelChainRepository, never()).deleteById(any(UUID.class));
-        }
-    }
-
-    private MotelChain createAnotherMotelChain() {
-        UUID anotherId = UUID.randomUUID();
+    @Test
+    @DisplayName("Should create MotelChain successfully")
+    void testCreateMotelChain_Success() {
+        // Arrange
+        when(repository.existsByMotelChainNameAndPincodeAndState(
+            "Hilton Hotels", "90001", "California"
+        )).thenReturn(false);
         
-        Address anotherAddress = new Address();
-        anotherAddress.setAddressLine1("456 Oak Ave");
-        anotherAddress.setAddressLine2("Floor 2");
-        anotherAddress.setLandmark("Near Shopping Mall");
-        anotherAddress.setAddressName("Branch Office");
-        anotherAddress.setStatus("ACTIVE");
+        when(mapper.toEntity(createRequest)).thenReturn(testEntity);
+        when(repository.save(testEntity)).thenReturn(testEntity);
+
+        // Act
+        MotelChain result = service.createMotelChain(createRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(testId, result.getMotelChainId());
+        assertEquals("Hilton Hotels", result.getMotelChainName());
         
-        ContactInfo anotherContactInfo = new ContactInfo();
-        anotherContactInfo.setPhoneNumber("987-654-3210");
-        anotherContactInfo.setEmail("another@example.com");
-        anotherContactInfo.setContactName("Jane Smith");
-        anotherContactInfo.setContactPosition("Director");
-        anotherContactInfo.setContactType("SECONDARY");
-        anotherContactInfo.setContactDescription("Branch operations contact");
-        anotherContactInfo.setStatus("ACTIVE");
+        // Verify interactions
+        verify(repository).existsByMotelChainNameAndPincodeAndState(
+            "Hilton Hotels", "90001", "California"
+        );
+        verify(mapper).toEntity(createRequest);
+        verify(repository).save(testEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw DuplicateResourceException when MotelChain exists")
+    void testCreateMotelChain_Duplicate() {
+        // Arrange
+        when(repository.existsByMotelChainNameAndPincodeAndState(
+            "Hilton Hotels", "90001", "California"
+        )).thenReturn(true);
+
+        // Act & Assert
+        DuplicateResourceException exception = assertThrows(
+            DuplicateResourceException.class,
+            () -> service.createMotelChain(createRequest)
+        );
         
-        MotelChain anotherChain = new MotelChain();
-        anotherChain.setMotelChainId(anotherId);
-        anotherChain.setMotelChainName("Another Motel Chain");
-        anotherChain.setDisplayName("Another Display Name");
-        anotherChain.setState("New York");
-        anotherChain.setPincode("10001");
-        anotherChain.setStatus("ACTIVE");
-        anotherChain.setAddress(anotherAddress);
-        anotherChain.setContactInfo(anotherContactInfo);
-        anotherChain.setCreatedAt(LocalDateTime.now());
-        anotherChain.setUpdatedAt(LocalDateTime.now());
+        assertTrue(exception.getMessage().contains("Hilton Hotels"));
+        assertTrue(exception.getMessage().contains("California"));
+
+        // Verify repository check was called but save was not
+        verify(repository).existsByMotelChainNameAndPincodeAndState(
+            "Hilton Hotels", "90001", "California"
+        );
+        verify(repository, never()).save(any());
+        verify(mapper, never()).toEntity(any());
+    }
+
+    // ========== GET ALL Tests ==========
+
+    @Test
+    @DisplayName("Should get all MotelChains with pagination")
+    void testGetAllMotelChains_Success() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        MotelChain entity2 = createSampleEntity(UUID.randomUUID());
+        entity2.setMotelChainName("Marriott Hotels");
         
-        return anotherChain;
+        List<MotelChain> entities = Arrays.asList(testEntity, entity2);
+        Page<MotelChain> page = new PageImpl<>(entities, pageable, entities.size());
+        
+        when(repository.findAll(pageable)).thenReturn(page);
+
+        // Act
+        Page<MotelChain> result = service.getAllMotelChains(pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(2, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+        assertEquals("Hilton Hotels", result.getContent().get(0).getMotelChainName());
+        assertEquals("Marriott Hotels", result.getContent().get(1).getMotelChainName());
+        
+        verify(repository).findAll(pageable);
+    }
+
+    @Test
+    @DisplayName("Should return empty page when no MotelChains exist")
+    void testGetAllMotelChains_Empty() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<MotelChain> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        
+        when(repository.findAll(pageable)).thenReturn(emptyPage);
+
+        // Act
+        Page<MotelChain> result = service.getAllMotelChains(pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
+        
+        verify(repository).findAll(pageable);
+    }
+
+    // ========== GET BY ID Tests ==========
+
+    @Test
+    @DisplayName("Should get MotelChain by ID successfully")
+    void testGetMotelChainById_Success() {
+        // Arrange
+        when(repository.findById(testId)).thenReturn(Optional.of(testEntity));
+
+        // Act
+        MotelChain result = service.getMotelChainById(testId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(testId, result.getMotelChainId());
+        assertEquals("Hilton Hotels", result.getMotelChainName());
+        
+        verify(repository).findById(testId);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when MotelChain not found")
+    void testGetMotelChainById_NotFound() {
+        // Arrange
+        UUID nonExistentId = UUID.randomUUID();
+        when(repository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class,
+            () -> service.getMotelChainById(nonExistentId)
+        );
+        
+        assertTrue(exception.getMessage().contains(nonExistentId.toString()));
+        assertTrue(exception.getMessage().contains("MotelChain"));
+
+        verify(repository).findById(nonExistentId);
+    }
+
+    // ========== UPDATE Tests ==========
+
+    @Test
+    @DisplayName("Should update MotelChain successfully")
+    void testUpdateMotelChain_Success() {
+        // Arrange
+        when(repository.findById(testId)).thenReturn(Optional.of(testEntity));
+        doNothing().when(mapper).updateEntity(updateRequest, testEntity);
+        
+        // After update, entity should have updated values
+        MotelChain updatedEntity = createSampleEntity(testId);
+        updatedEntity.setMotelChainName("Hilton Hotels & Resorts");
+        when(repository.save(testEntity)).thenReturn(updatedEntity);
+
+        // Act
+        MotelChain result = service.updateMotelChain(testId, updateRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(testId, result.getMotelChainId());
+        assertEquals("Hilton Hotels & Resorts", result.getMotelChainName());
+        
+        verify(repository).findById(testId);
+        verify(mapper).updateEntity(updateRequest, testEntity);
+        verify(repository).save(testEntity);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when updating non-existent MotelChain")
+    void testUpdateMotelChain_NotFound() {
+        // Arrange
+        UUID nonExistentId = UUID.randomUUID();
+        when(repository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class,
+            () -> service.updateMotelChain(nonExistentId, updateRequest)
+        );
+        
+        assertTrue(exception.getMessage().contains(nonExistentId.toString()));
+
+        verify(repository).findById(nonExistentId);
+        verify(mapper, never()).updateEntity(any(), any());
+        verify(repository, never()).save(any());
+    }
+
+    // ========== DELETE Tests ==========
+
+    @Test
+    @DisplayName("Should delete MotelChain successfully")
+    void testDeleteMotelChain_Success() {
+        // Arrange
+        when(repository.existsById(testId)).thenReturn(true);
+        doNothing().when(repository).deleteById(testId);
+
+        // Act & Assert - should not throw
+        assertDoesNotThrow(() -> service.deleteMotelChain(testId));
+
+        verify(repository).existsById(testId);
+        verify(repository).deleteById(testId);
+    }
+
+    @Test
+    @DisplayName("Should throw ResourceNotFoundException when deleting non-existent MotelChain")
+    void testDeleteMotelChain_NotFound() {
+        // Arrange
+        UUID nonExistentId = UUID.randomUUID();
+        when(repository.existsById(nonExistentId)).thenReturn(false);
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(
+            ResourceNotFoundException.class,
+            () -> service.deleteMotelChain(nonExistentId)
+        );
+        
+        assertTrue(exception.getMessage().contains(nonExistentId.toString()));
+
+        verify(repository).existsById(nonExistentId);
+        verify(repository, never()).deleteById(any());
+    }
+
+    // ========== Edge Case Tests ==========
+
+    @Test
+    @DisplayName("Should handle null address in entity creation")
+    void testCreateMotelChain_NullAddress() {
+        // Arrange
+        CreateMotelChainRequest requestWithoutAddress = createSampleCreateRequest();
+        requestWithoutAddress.setAddress(null);
+        
+        MotelChain entityWithoutAddress = createSampleEntity(testId);
+        entityWithoutAddress.setAddress(null);
+        
+        when(repository.existsByMotelChainNameAndPincodeAndState(any(), any(), any()))
+            .thenReturn(false);
+        when(mapper.toEntity(requestWithoutAddress)).thenReturn(entityWithoutAddress);
+        when(repository.save(entityWithoutAddress)).thenReturn(entityWithoutAddress);
+
+        // Act
+        MotelChain result = service.createMotelChain(requestWithoutAddress);
+
+        // Assert
+        assertNotNull(result);
+        assertNull(result.getAddress());
+        
+        verify(repository).save(entityWithoutAddress);
+    }
+
+    @Test
+    @DisplayName("Should handle pagination with different page sizes")
+    void testGetAllMotelChains_DifferentPageSizes() {
+        // Arrange
+        Pageable smallPage = PageRequest.of(0, 5);
+        List<MotelChain> entities = Arrays.asList(testEntity);
+        Page<MotelChain> page = new PageImpl<>(entities, smallPage, 10);
+        
+        when(repository.findAll(smallPage)).thenReturn(page);
+
+        // Act
+        Page<MotelChain> result = service.getAllMotelChains(smallPage);
+
+        // Assert
+        assertEquals(5, result.getSize());
+        assertEquals(1, result.getNumberOfElements());
+        assertEquals(10, result.getTotalElements());
+        assertEquals(2, result.getTotalPages()); // 10 total / 5 per page = 2 pages
+        
+        verify(repository).findAll(smallPage);
+    }
+
+    // ========== Helper Methods ==========
+
+    private MotelChain createSampleEntity(UUID id) {
+        MotelChain entity = new MotelChain();
+        entity.setMotelChainId(id);
+        entity.setMotelChainName("Hilton Hotels");
+        entity.setDisplayName("Hilton");
+        entity.setState("California");
+        entity.setPincode("90001");
+        entity.setStatus("ACTIVE");
+        entity.setCreatedAt(LocalDateTime.now().minusDays(1));
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        Address address = new Address();
+        address.setAddressLine1("123 Main Street");
+        address.setAddressLine2("Suite 500");
+        address.setLandmark("Near Central Park");
+        address.setAddressName("Headquarters");
+        address.setStatus("ACTIVE");
+        entity.setAddress(address);
+
+        ContactInfo contactInfo = new ContactInfo();
+        contactInfo.setPhoneNumber("+12025551234");
+        contactInfo.setEmail("contact@hilton.com");
+        contactInfo.setContactName("John Doe");
+        contactInfo.setContactPosition("Manager");
+        contactInfo.setContactType("PRIMARY");
+        contactInfo.setContactDescription("Main contact");
+        contactInfo.setStatus("ACTIVE");
+        entity.setContactInfo(contactInfo);
+
+        return entity;
+    }
+
+    private CreateMotelChainRequest createSampleCreateRequest() {
+        CreateMotelChainRequest request = new CreateMotelChainRequest();
+        request.setMotelChainName("Hilton Hotels");
+        request.setDisplayName("Hilton");
+        request.setState("California");
+        request.setPincode("90001");
+        request.setStatus("ACTIVE");
+
+        AddressRequest address = new AddressRequest();
+        address.setAddressLine1("123 Main Street");
+        address.setAddressLine2("Suite 500");
+        address.setLandmark("Near Central Park");
+        address.setAddressName("Headquarters");
+        address.setStatus("ACTIVE");
+        request.setAddress(address);
+
+        ContactInfoRequest contactInfo = new ContactInfoRequest();
+        contactInfo.setPhoneNumber("+12025551234");
+        contactInfo.setEmail("contact@hilton.com");
+        contactInfo.setContactName("John Doe");
+        contactInfo.setContactPosition("Manager");
+        contactInfo.setContactType("PRIMARY");
+        contactInfo.setContactDescription("Main contact");
+        contactInfo.setStatus("ACTIVE");
+        request.setContactInfo(contactInfo);
+
+        return request;
+    }
+
+    private UpdateMotelChainRequest createSampleUpdateRequest() {
+        UpdateMotelChainRequest request = new UpdateMotelChainRequest();
+        request.setMotelChainName("Hilton Hotels & Resorts");
+        request.setDisplayName("Hilton Worldwide");
+        request.setState("California");
+        request.setPincode("90001");
+        request.setStatus("ACTIVE");
+
+        AddressRequest address = new AddressRequest();
+        address.setAddressLine1("456 New Address");
+        address.setAddressLine2("Floor 10");
+        address.setLandmark("Near Beach");
+        address.setAddressName("New HQ");
+        address.setStatus("ACTIVE");
+        request.setAddress(address);
+
+        ContactInfoRequest contactInfo = new ContactInfoRequest();
+        contactInfo.setPhoneNumber("+12025559999");
+        contactInfo.setEmail("newemail@hilton.com");
+        contactInfo.setContactName("Jane Smith");
+        contactInfo.setContactPosition("Director");
+        contactInfo.setContactType("PRIMARY");
+        contactInfo.setContactDescription("Updated contact");
+        contactInfo.setStatus("ACTIVE");
+        request.setContactInfo(contactInfo);
+
+        return request;
     }
 }

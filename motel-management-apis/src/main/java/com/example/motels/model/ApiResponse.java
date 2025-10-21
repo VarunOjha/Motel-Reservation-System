@@ -1,70 +1,57 @@
 package com.example.motels.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+/**
+ * Standard API response wrapper for all endpoints.
+ * Provides consistent response format across the application.
+ * 
+ * @param <T> Type of data being returned
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
     
-    @JsonProperty("response")
-    private ResponseWrapper<T> response;
+    private String status;
+    private T data;
+    private String message;
     
+    // Constructors
     public ApiResponse() {}
     
-    public ApiResponse(String httpCode, T data) {
-        this.response = new ResponseWrapper<>(httpCode, data, "");
+    public ApiResponse(String status, T data) {
+        this.status = status;
+        this.data = data;
+        this.message = null;
     }
     
-    public ApiResponse(String httpCode, T data, String message) {
-        this.response = new ResponseWrapper<>(httpCode, data, message);
+    public ApiResponse(String status, T data, String message) {
+        this.status = status;
+        this.data = data;
+        this.message = message;
     }
     
-    public ResponseWrapper<T> getResponse() {
-        return response;
+    // Getters and Setters
+    public String getStatus() {
+        return status;
     }
     
-    public void setResponse(ResponseWrapper<T> response) {
-        this.response = response;
+    public void setStatus(String status) {
+        this.status = status;
     }
     
-    public static class ResponseWrapper<T> {
-        @JsonProperty("http_code")
-        private String httpCode;
-        
-        @JsonProperty("data")
-        private T data;
-        
-        @JsonProperty("message")
-        private String message;
-        
-        public ResponseWrapper() {}
-        
-        public ResponseWrapper(String httpCode, T data, String message) {
-            this.httpCode = httpCode;
-            this.data = data;
-            this.message = message != null ? message : "";
-        }
-        
-        public String getHttpCode() {
-            return httpCode;
-        }
-        
-        public void setHttpCode(String httpCode) {
-            this.httpCode = httpCode;
-        }
-        
-        public T getData() {
-            return data;
-        }
-        
-        public void setData(T data) {
-            this.data = data;
-        }
-        
-        public String getMessage() {
-            return message;
-        }
-        
-        public void setMessage(String message) {
-            this.message = message != null ? message : "";
-        }
+    public T getData() {
+        return data;
+    }
+    
+    public void setData(T data) {
+        this.data = data;
+    }
+    
+    public String getMessage() {
+        return message;
+    }
+    
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
