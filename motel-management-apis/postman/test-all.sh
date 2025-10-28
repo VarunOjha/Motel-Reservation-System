@@ -2,11 +2,33 @@
 
 # MotelChain API - Complete Test Suite
 # Handles existing data gracefully
+# Verifies correlation ID and timestamp in all responses
 
 echo "=========================================="
 echo "  MotelChain API - Test Suite"
 echo "=========================================="
 echo ""
+
+# Function to verify correlationId and timestamp in response
+verify_correlation_fields() {
+    local response_body=$1
+    local test_name=$2
+    
+    CORRELATION_ID=$(echo "$response_body" | jq -r '.correlationId // empty')
+    TIMESTAMP=$(echo "$response_body" | jq -r '.timestamp // empty')
+    
+    if [ -n "$CORRELATION_ID" ] && [ "$CORRELATION_ID" != "null" ]; then
+        echo "   ✓ correlationId: $CORRELATION_ID"
+    else
+        echo "   ✗ Missing correlationId in $test_name"
+    fi
+    
+    if [ -n "$TIMESTAMP" ] && [ "$TIMESTAMP" != "null" ]; then
+        echo "   ✓ timestamp: $TIMESTAMP"
+    else
+        echo "   ✗ Missing timestamp in $test_name"
+    fi
+}
 
 # Get existing record to use for update/delete tests
 echo "📋 Fetching existing records..."
@@ -56,6 +78,7 @@ BODY=$(echo "$RESPONSE" | sed '$d')
 if [ "$HTTP_CODE" = "201" ]; then
     echo "✅ Status: $HTTP_CODE Created"
     echo "$BODY" | jq .
+    verify_correlation_fields "$BODY" "Test 1"
     NEW_ID=$(echo "$BODY" | jq -r '.data.motelChainId')
     TEST_ID="$NEW_ID"
     echo "📝 Saved ID for testing: $TEST_ID"
@@ -92,6 +115,7 @@ else
     echo "❌ Expected 400, got: $HTTP_CODE"
 fi
 echo "$BODY" | jq .
+verify_correlation_fields "$BODY" "Test 2"
 echo ""
 
 # Test 3: Duplicate MotelChain
@@ -144,6 +168,7 @@ if [ -n "$TEST_ID" ]; then
     if [ "$HTTP_CODE" = "200" ]; then
         echo "✅ Status: $HTTP_CODE OK"
         echo "$BODY" | jq '{motelChainId, motelChainName, state, pincode}'
+        verify_correlation_fields "$BODY" "Test 5"
     else
         echo "❌ Expected 200, got: $HTTP_CODE"
         echo "$BODY" | jq .
@@ -165,6 +190,7 @@ else
     echo "❌ Expected 404, got: $HTTP_CODE"
 fi
 echo "$BODY" | jq .
+verify_correlation_fields "$BODY" "Test 6"
 echo ""
 
 # Test 7: Update MotelChain
