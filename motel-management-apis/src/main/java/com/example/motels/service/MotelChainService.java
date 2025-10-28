@@ -24,7 +24,6 @@ import java.util.UUID;
  * - DTOs for input/output (API contract decoupled from database)
  * - Custom exceptions for better error handling
  * - @Transactional for data consistency
- * - Automatic logging via AOP (see LoggingAspect)
  */
 @Service
 @Transactional(readOnly = true) // Default: Read-only transactions for performance
@@ -37,10 +36,6 @@ public class MotelChainService {
     public MotelChainService(MotelChainRepository motelChainRepository, MotelChainMapper mapper) {
         this.motelChainRepository = motelChainRepository;
         this.mapper = mapper;
-        
-        // Proof that Spring creates a proxy! Uncomment to see:
-        // System.out.println("Actual class: " + this.getClass().getName());
-        // Output will be: MotelChainService$$SpringCGLIB$$0
     }
 
     /**
