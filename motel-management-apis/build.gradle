@@ -20,10 +20,44 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation' // Bean Validation (JSR-380)
 	runtimeOnly 'org.postgresql:postgresql'
 	
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	
+	// MapStruct for compile-time bean mapping
+	// THEORY: Why two dependencies?
+	// 1. mapstruct = Runtime API (annotations like @Mapper, @Mapping)
+	// 2. mapstruct-processor = Compile-time code generator (creates implementations)
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+	
+	// THEORY: Lombok + MapStruct Integration
+	// Order matters! Lombok must run BEFORE MapStruct
+	// Why? MapStruct needs to see getters/setters that Lombok generates
+	// Solution: Add lombok to MapStruct's annotation processor path
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	
+	// SpringDoc OpenAPI (Swagger) for API documentation
+	// THEORY: What is SpringDoc?
+	// - Auto-generates OpenAPI 3.0 specification from Spring code
+	// - Provides Swagger UI for interactive API testing
+	// - Scans @RestController, @RequestMapping, @Operation annotations
+	// - No XML configuration needed (unlike old Springfox)
+	//
+	// Why SpringDoc instead of Springfox?
+	// - Springfox: Outdated, uses OpenAPI 2.0 (Swagger 2)
+	// - SpringDoc: Modern, uses OpenAPI 3.0, actively maintained
+	// - SpringDoc: Better Spring Boot 3.x support
+	//
+	// What you get:
+	// - Swagger UI: http://localhost:8085/swagger-ui.html
+	// - OpenAPI JSON: http://localhost:8085/v3/api-docs
+	// - Interactive testing directly in browser
+	//
+	// Version 2.7.0 - Latest version with Spring Boot 3.5.x support
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
