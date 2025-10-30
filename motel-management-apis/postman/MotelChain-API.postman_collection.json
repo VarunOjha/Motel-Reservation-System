@@ -1,0 +1,488 @@
+{
+	"info": {
+		"_postman_id": "motelchain-api-fixed",
+		"name": "MotelChain API - Fixed Tests",
+		"description": "Fixed test suite with correct response validation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "✅ 1. Create MotelChain (Valid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Test 2: Response structure",
+							"pm.test(\"Response has ApiResponse structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"});",
+							"",
+							"// Test 3: DTO validation",
+							"pm.test(\"Response contains DTO (not entity)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.data) {",
+							"        pm.expect(jsonData.data).to.have.property('motelChainId');",
+							"        pm.expect(jsonData.data).to.have.property('motelChainName');",
+							"        pm.expect(jsonData.data).to.not.have.property('deletedAt');",
+							"    }",
+							"});",
+							"",
+							"// Save ID for later tests",
+							"if (pm.response.code === 201) {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        if (jsonData.data && jsonData.data.motelChainId) {",
+							"            pm.collectionVariables.set(\"motelChainId\", jsonData.data.motelChainId);",
+							"            console.log(\"Saved motelChainId: \" + jsonData.data.motelChainId);",
+							"        }",
+							"    } catch(e) {",
+							"        console.log(\"Error saving ID: \" + e);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainName\": \"Hilton Hotels\",\n  \"displayName\": \"Hilton\",\n  \"state\": \"California\",\n  \"pincode\": \"90001\",\n  \"status\": \"ACTIVE\",\n  \"address\": {\n    \"addressLine1\": \"123 Main Street\",\n    \"addressLine2\": \"Suite 500\",\n    \"landmark\": \"Near Central Park\",\n    \"addressName\": \"Headquarters\",\n    \"status\": \"ACTIVE\"\n  },\n  \"contactInfo\": {\n    \"phoneNumber\": \"+12025551234\",\n    \"email\": \"contact@hilton.com\",\n    \"contactName\": \"John Doe\",\n    \"contactPosition\": \"Manager\",\n    \"contactType\": \"PRIMARY\",\n    \"contactDescription\": \"Main contact\",\n    \"status\": \"ACTIVE\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 2. Validation Errors",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"// Test 2: Response structure",
+							"pm.test(\"Response has error structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"    pm.expect(jsonData).to.have.property('message');",
+							"});",
+							"",
+							"// Test 3: Field-level errors",
+							"pm.test(\"Response contains validation errors\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.be.an('object');",
+							"    // Check if at least one field error exists",
+							"    var hasErrors = Object.keys(jsonData.data).length > 0;",
+							"    pm.expect(hasErrors).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"displayName\": \"Hilton\",\n  \"state\": \"C\",\n  \"pincode\": \"123\",\n  \"status\": \"ACTIVE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 3. Duplicate MotelChain",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Error message indicates duplicate\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('already exists');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainName\": \"Hilton Hotels\",\n  \"displayName\": \"Hilton\",\n  \"state\": \"California\",\n  \"pincode\": \"90001\",\n  \"status\": \"ACTIVE\",\n  \"address\": {\n    \"addressLine1\": \"123 Main Street\",\n    \"addressLine2\": \"Suite 500\",\n    \"landmark\": \"Near Central Park\",\n    \"addressName\": \"Headquarters\",\n    \"status\": \"ACTIVE\"\n  },\n  \"contactInfo\": {\n    \"phoneNumber\": \"+12025551234\",\n    \"email\": \"contact@hilton.com\",\n    \"contactName\": \"John Doe\",\n    \"contactPosition\": \"Manager\",\n    \"contactType\": \"PRIMARY\",\n    \"contactDescription\": \"Main contact\",\n    \"status\": \"ACTIVE\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 4. Get All (Paginated)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has pagination structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('content');",
+							"    pm.expect(jsonData.data).to.have.property('pagination');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains?page=0&size=10&sort=createdAt&direction=desc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						},
+						{
+							"key": "sort",
+							"value": "createdAt"
+						},
+						{
+							"key": "direction",
+							"value": "desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 5. Get by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response contains MotelChain DTO\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('motelChainId');",
+							"    pm.expect(jsonData.data).to.have.property('motelChainName');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains/{{motelChainId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains",
+						"{{motelChainId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 6. Get Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error message indicates not found\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('not found');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 7. Update MotelChain",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response contains updated data\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('motelChainName');",
+							"    pm.expect(jsonData.data).to.have.property('updatedAt');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainName\": \"Hilton Hotels & Resorts\",\n  \"displayName\": \"Hilton Worldwide\",\n  \"state\": \"California\",\n  \"pincode\": \"90001\",\n  \"status\": \"ACTIVE\",\n  \"address\": {\n    \"addressLine1\": \"456 New Address\",\n    \"addressLine2\": \"Floor 10\",\n    \"landmark\": \"Near Beach\",\n    \"addressName\": \"New HQ\",\n    \"status\": \"ACTIVE\"\n  },\n  \"contactInfo\": {\n    \"phoneNumber\": \"+12025559999\",\n    \"email\": \"newemail@hilton.com\",\n    \"contactName\": \"Jane Smith\",\n    \"contactPosition\": \"Director\",\n    \"contactType\": \"PRIMARY\",\n    \"contactDescription\": \"Updated contact\",\n    \"status\": \"ACTIVE\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains/{{motelChainId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains",
+						"{{motelChainId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 8. Update Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainName\": \"Test\",\n  \"displayName\": \"Test\",\n  \"state\": \"California\",\n  \"pincode\": \"90001\",\n  \"status\": \"ACTIVE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 9. Delete MotelChain",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204 No Content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains/{{motelChainId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains",
+						"{{motelChainId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 10. Delete Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelChains/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelChains",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8085",
+			"type": "string"
+		},
+		{
+			"key": "motelChainId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
