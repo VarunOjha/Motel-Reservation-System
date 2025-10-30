@@ -18,7 +18,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -43,10 +45,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Uses MockMvc to test HTTP layer without starting full server.
  * 
  * @WebMvcTest - Loads only web layer (controllers, filters, etc.)
- * @MockBean - Mocks the service layer
+ * @MockitoBean - Mocks the service layer (replaces deprecated @MockBean)
  */
 @WebMvcTest(MotelChainController.class)
 @DisplayName("MotelChainController Tests")
+@MockitoSettings(strictness = Strictness.LENIENT)
 class MotelChainControllerTest {
 
     @Autowired
@@ -55,10 +58,10 @@ class MotelChainControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private MotelChainService service;
 
-    @MockBean
+    @MockitoBean
     private MotelChainMapper mapper;
 
     private UUID testId;
