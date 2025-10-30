@@ -39,6 +39,26 @@ dependencies {
 	// Solution: Add lombok to MapStruct's annotation processor path
 	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 	
+	// SpringDoc OpenAPI (Swagger) for API documentation
+	// THEORY: What is SpringDoc?
+	// - Auto-generates OpenAPI 3.0 specification from Spring code
+	// - Provides Swagger UI for interactive API testing
+	// - Scans @RestController, @RequestMapping, @Operation annotations
+	// - No XML configuration needed (unlike old Springfox)
+	//
+	// Why SpringDoc instead of Springfox?
+	// - Springfox: Outdated, uses OpenAPI 2.0 (Swagger 2)
+	// - SpringDoc: Modern, uses OpenAPI 3.0, actively maintained
+	// - SpringDoc: Better Spring Boot 3.x support
+	//
+	// What you get:
+	// - Swagger UI: http://localhost:8085/swagger-ui.html
+	// - OpenAPI JSON: http://localhost:8085/v3/api-docs
+	// - Interactive testing directly in browser
+	//
+	// Version 2.7.0 - Latest version with Spring Boot 3.5.x support
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testCompileOnly 'org.projectlombok:lombok:1.18.30'

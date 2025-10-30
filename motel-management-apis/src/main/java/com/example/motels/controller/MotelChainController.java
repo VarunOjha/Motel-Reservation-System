@@ -8,6 +8,12 @@ import com.example.motels.model.ApiResponse;
 import com.example.motels.model.PaginatedResponse;
 import com.example.motels.model.MotelChain;
 import com.example.motels.service.MotelChainService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +34,9 @@ import java.util.UUID;
  * - Bean Validation with @Valid (no manual validation)
  * - Exceptions handled by GlobalExceptionHandler
  * - Clean, focused controller logic
+ * - Swagger/OpenAPI documentation
  */
+@Tag(name = "Motel Chain Management", description = "APIs for managing motel chains including CRUD operations, pagination, and search")
 @RestController
 @RequestMapping("/motelApi/v1/motelChains")
 public class MotelChainController {
