@@ -26,6 +26,19 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 	
+	// MapStruct for compile-time bean mapping
+	// THEORY: Why two dependencies?
+	// 1. mapstruct = Runtime API (annotations like @Mapper, @Mapping)
+	// 2. mapstruct-processor = Compile-time code generator (creates implementations)
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+	
+	// THEORY: Lombok + MapStruct Integration
+	// Order matters! Lombok must run BEFORE MapStruct
+	// Why? MapStruct needs to see getters/setters that Lombok generates
+	// Solution: Add lombok to MapStruct's annotation processor path
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testCompileOnly 'org.projectlombok:lombok:1.18.30'
