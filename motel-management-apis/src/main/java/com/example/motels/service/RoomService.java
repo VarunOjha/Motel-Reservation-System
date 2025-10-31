@@ -1,9 +1,10 @@
 package com.example.motels.service;
 
+import com.example.motels.exception.DuplicateResourceException;
+import com.example.motels.exception.ResourceNotFoundException;
 import com.example.motels.model.Room;
 import com.example.motels.repository.RoomRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,10 +14,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class RoomService {
 
-    @Autowired
-    private RoomRepository roomRepository;
+    private final RoomRepository roomRepository;
 
     public List<Room> getAllRooms() {
         return roomRepository.findAll();
@@ -69,8 +70,9 @@ public class RoomService {
         return roomRepository.findAll(pageable);
     }
 
-    public Optional<Room> getRoomById(UUID roomId) {
-        return roomRepository.findById(roomId);
+    public Room getRoomById(UUID roomId) {
+        return roomRepository.findById(roomId)
+            .orElseThrow(() -> new ResourceNotFoundException("Room", "id", roomId.toString()));
     }
 
     public Optional<Room> getRoomById(UUID motelChainId, UUID motelId, UUID roomId) {
@@ -84,6 +86,12 @@ public class RoomService {
     }
 
     public Room createRoom(Room room) {
+        // Check for duplicate room number within same motel
+        if (roomRepository.existsByMotelIdAndMotelChainIdAndMotelRoomCategoryIdAndRoomNumber(
+                room.getMotelId(), room.getMotelChainId(), room.getMotelRoomCategoryId(), room.getRoomNumber())) {
+            throw new DuplicateResourceException("Room", 
+                "room number '" + room.getRoomNumber() + "' already exists for this motel");
+        }
         return roomRepository.save(room);
     }
 
@@ -94,18 +102,24 @@ public class RoomService {
     }
 
     public Room updateRoom(UUID roomId, Room room) {
-        if (roomRepository.existsByRoomIdAndMotelChainIdAndMotelId(roomId, room.getMotelChainId(), room.getMotelId())) {
-            room.setRoomId(roomId);
-            return roomRepository.save(room);
+        Room existing = getRoomById(roomId);
+        
+        // Check duplicate room number if it's being changed
+        if (room.getRoomNumber() != null && !room.getRoomNumber().equals(existing.getRoomNumber())) {
+            if (roomRepository.existsByMotelIdAndMotelChainIdAndMotelRoomCategoryIdAndRoomNumber(
+                    existing.getMotelId(), existing.getMotelChainId(), 
+                    existing.getMotelRoomCategoryId(), room.getRoomNumber())) {
+                throw new DuplicateResourceException("Room", 
+                    "room number '" + room.getRoomNumber() + "' already exists for this motel");
+            }
         }
-        return null;
+        
+        room.setRoomId(roomId);
+        return roomRepository.save(room);
     }
 
-    public boolean deleteRoom(UUID motelChainId, UUID motelId, UUID roomId) {
-        if (roomRepository.existsByRoomIdAndMotelChainIdAndMotelId(roomId, motelChainId, motelId)) {
-            roomRepository.deleteById(roomId);
-            return true;
-        }
-        return false;
+    public void deleteRoom(UUID roomId) {
+        Room room = getRoomById(roomId); // Throws if not found
+        roomRepository.deleteById(roomId);
     }
 }
