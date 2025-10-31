@@ -1,0 +1,658 @@
+{
+	"info": {
+		"_postman_id": "room-api-tests",
+		"name": "Room API - Complete Test Suite",
+		"description": "Comprehensive test suite for Room API with DTOs, validation, and Swagger",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "✅ 1. Create Room (Valid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Response has ApiResponse structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('correlationId');",
+							"    pm.expect(jsonData).to.have.property('timestamp');",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"    pm.expect(jsonData).to.have.property('message');",
+							"});",
+							"",
+							"pm.test(\"Response contains RoomResponse DTO\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.data) {",
+							"        pm.expect(jsonData.data).to.have.property('roomId');",
+							"        pm.expect(jsonData.data).to.have.property('roomNumber');",
+							"        pm.expect(jsonData.data).to.have.property('motelChainId');",
+							"        pm.expect(jsonData.data).to.have.property('motelId');",
+							"        pm.expect(jsonData.data).to.have.property('status');",
+							"        pm.expect(jsonData.data).to.have.property('createdAt');",
+							"        pm.expect(jsonData.data).to.have.property('updatedAt');",
+							"        pm.expect(jsonData.data).to.not.have.property('deletedAt');",
+							"    }",
+							"});",
+							"",
+							"pm.test(\"Success message is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.equal('Room created successfully');",
+							"});",
+							"",
+							"if (pm.response.code === 201) {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        if (jsonData.data && jsonData.data.roomId) {",
+							"            pm.collectionVariables.set(\"roomId\", jsonData.data.roomId);",
+							"            console.log(\"✅ Saved roomId: \" + jsonData.data.roomId);",
+							"        }",
+							"    } catch(e) {",
+							"        console.log(\"❌ Error saving ID: \" + e);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelId\": \"{{motelId}}\",\n  \"motelRoomCategoryId\": \"{{roomCategoryId}}\",\n  \"roomNumber\": \"101\",\n  \"floor\": \"1\",\n  \"status\": \"AVAILABLE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 2. Get Room by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has correct structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"    pm.expect(jsonData.data).to.have.property('roomId');",
+							"});",
+							"",
+							"pm.test(\"Room data is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.roomNumber).to.equal('101');",
+							"    pm.expect(jsonData.data.status).to.equal('AVAILABLE');",
+							"});",
+							"",
+							"pm.test(\"Timestamps are present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.createdAt).to.be.a('string');",
+							"    pm.expect(jsonData.data.updatedAt).to.be.a('string');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms/{{roomId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms",
+						"{{roomId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 3. Get All Rooms (Paginated)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has pagination structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('content');",
+							"    pm.expect(jsonData.data).to.have.property('pagination');",
+							"    pm.expect(jsonData.data.content).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Pagination info is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var pagination = jsonData.data.pagination;",
+							"    pm.expect(pagination).to.have.property('page');",
+							"    pm.expect(pagination).to.have.property('size');",
+							"    pm.expect(pagination).to.have.property('total_elements');",
+							"    pm.expect(pagination).to.have.property('total_pages');",
+							"    pm.expect(pagination.page).to.equal(0);",
+							"    pm.expect(pagination.size).to.equal(10);",
+							"});",
+							"",
+							"pm.test(\"Content array has at least 1 item\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.content.length).to.be.above(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms?page=0&size=10&sort=roomNumber&direction=asc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						},
+						{
+							"key": "sort",
+							"value": "roomNumber"
+						},
+						{
+							"key": "direction",
+							"value": "asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 4. Update Room (Partial)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status was updated to OCCUPIED\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.status).to.equal('OCCUPIED');",
+							"});",
+							"",
+							"pm.test(\"Room number unchanged\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.roomNumber).to.equal('101');",
+							"});",
+							"",
+							"pm.test(\"updatedAt timestamp changed\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.updatedAt).to.not.equal(jsonData.data.createdAt);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"status\": \"OCCUPIED\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms/{{roomId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms",
+						"{{roomId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 5. Validation Error - Blank Room Number",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response has error structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('message');",
+							"    pm.expect(jsonData.message).to.equal('Validation failed');",
+							"});",
+							"",
+							"pm.test(\"Validation errors present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('roomNumber');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelId\": \"{{motelId}}\",\n  \"motelRoomCategoryId\": \"{{roomCategoryId}}\",\n  \"roomNumber\": \"\",\n  \"status\": \"AVAILABLE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 6. Validation Error - Invalid Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Status validation error present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('status');",
+							"    pm.expect(jsonData.data.status).to.include('AVAILABLE');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelId\": \"{{motelId}}\",\n  \"motelRoomCategoryId\": \"{{roomCategoryId}}\",\n  \"roomNumber\": \"102\",\n  \"status\": \"INVALID_STATUS\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 7. Duplicate Room Number Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Duplicate error message is clear\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('already exists');",
+							"    pm.expect(jsonData.message).to.include('101');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelId\": \"{{motelId}}\",\n  \"motelRoomCategoryId\": \"{{roomCategoryId}}\",\n  \"roomNumber\": \"101\",\n  \"floor\": \"2\",\n  \"status\": \"AVAILABLE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 8. Invalid Sort Field",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Error message lists allowed fields\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('Invalid sort field');",
+							"    pm.expect(jsonData.message).to.include('Allowed fields');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms?sort=invalidField",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "invalidField"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 9. Custom Correlation ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Custom correlation ID is returned\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.correlationId).to.equal('my-custom-room-test-id');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Correlation-ID",
+						"value": "my-custom-room-test-id",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms?page=0&size=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 10. Not Found Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error message is clear\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('not found');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 11. Delete Room",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Success message is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.equal('Room deleted successfully');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms/{{roomId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms",
+						"{{roomId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 12. Verify Deleted (404)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Room not found after delete\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('not found');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRooms/{{roomId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRooms",
+						"{{roomId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8085",
+			"type": "string"
+		},
+		{
+			"key": "motelChainId",
+			"value": "f22bdf78-4713-4292-ac50-a2be85155115",
+			"type": "string"
+		},
+		{
+			"key": "motelId",
+			"value": "00000000-0000-0000-0000-000000000001",
+			"type": "string"
+		},
+		{
+			"key": "roomCategoryId",
+			"value": "b57522e9-2ecb-4b5e-9480-9b3cad04d47b",
+			"type": "string"
+		},
+		{
+			"key": "roomId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
