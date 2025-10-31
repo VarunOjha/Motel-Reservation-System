@@ -3,6 +3,10 @@
 # Motel API Test Runner
 # This script runs the Postman collection using Newman
 
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
 echo "🧪 Motel API - Test Suite Runner"
 echo "========================================"
 echo ""
