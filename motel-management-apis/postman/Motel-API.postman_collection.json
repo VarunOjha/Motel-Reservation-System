@@ -1,0 +1,410 @@
+{
+	"info": {
+		"_postman_id": "motel-api-tests",
+		"name": "Motel API - Complete Test Suite",
+		"description": "Comprehensive test suite for Motel API with DTOs, validation, and Swagger",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "✅ 1. Create Motel (Valid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Response has ApiResponse structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"    pm.expect(jsonData).to.have.property('message');",
+							"});",
+							"",
+							"pm.test(\"Response contains MotelResponse DTO\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('motelId');",
+							"    pm.expect(jsonData.data).to.have.property('motelName');",
+							"    pm.expect(jsonData.data).to.have.property('status');",
+							"});",
+							"",
+							"if (pm.response.code === 201) {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.data && jsonData.data.motelId) {",
+							"        pm.collectionVariables.set(\"motelId\", jsonData.data.motelId);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelName\": \"Grand Plaza Hotel\",\n  \"status\": \"ACTIVE\",\n  \"pincode\": \"560001\",\n  \"state\": \"Karnataka\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 2. Get Motel by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Motel data is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.motelName).to.equal('Grand Plaza Hotel');",
+							"    pm.expect(jsonData.data.status).to.equal('ACTIVE');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels/{{motelId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels", "{{motelId}}"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 3. Get All Motels (Paginated)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has pagination structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('content');",
+							"    pm.expect(jsonData.data).to.have.property('pagination');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels?page=0&size=10&sort=motelName&direction=asc",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels"],
+					"query": [
+						{"key": "page", "value": "0"},
+						{"key": "size", "value": "10"},
+						{"key": "sort", "value": "motelName"},
+						{"key": "direction", "value": "asc"}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 4. Update Motel (Partial)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status was updated\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.status).to.equal('INACTIVE');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"status\": \"INACTIVE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels/{{motelId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels", "{{motelId}}"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 5. Validation Error - Blank Motel Name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Validation error present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('motelName');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelName\": \"\",\n  \"pincode\": \"560001\",\n  \"state\": \"Karnataka\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 6. Validation Error - Invalid UUID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"invalid-uuid\",\n  \"motelName\": \"Test Hotel\",\n  \"pincode\": \"560001\",\n  \"state\": \"Karnataka\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 7. Duplicate Motel Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelName\": \"Grand Plaza Hotel\",\n  \"status\": \"ACTIVE\",\n  \"pincode\": \"560001\",\n  \"state\": \"Karnataka\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 8. Invalid Sort Field",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels?sort=invalidField",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels"],
+					"query": [
+						{"key": "sort", "value": "invalidField"}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 9. Not Found Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels/00000000-0000-0000-0000-000000000000",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels", "00000000-0000-0000-0000-000000000000"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 10. Delete Motel",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels/{{motelId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels", "{{motelId}}"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 11. Verify Deleted (404)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motels/{{motelId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "motels", "{{motelId}}"]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8085",
+			"type": "string"
+		},
+		{
+			"key": "motelChainId",
+			"value": "f22bdf78-4713-4292-ac50-a2be85155115",
+			"type": "string"
+		},
+		{
+			"key": "motelId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

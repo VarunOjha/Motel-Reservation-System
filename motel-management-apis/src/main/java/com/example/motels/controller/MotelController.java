@@ -1,29 +1,51 @@
 package com.example.motels.controller;
 
+import com.example.motels.dto.mapper.MotelMapper;
+import com.example.motels.dto.request.CreateMotelRequest;
+import com.example.motels.dto.request.UpdateMotelRequest;
+import com.example.motels.dto.response.MotelResponse;
 import com.example.motels.model.ApiResponse;
 import com.example.motels.model.Motel;
 import com.example.motels.model.PaginatedResponse;
 import com.example.motels.service.MotelService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/motelApi/v1/motels")
+@Tag(name = "Motel Management", description = "APIs for managing motels")
+@RequiredArgsConstructor
 public class MotelController {
 
-    @Autowired
-    private MotelService motelService;
+    private final MotelService motelService;
+    private final MotelMapper motelMapper;
+
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+        "motelName", "status", "pincode", "state", "createdAt", "updatedAt"
+    );
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PaginatedResponse<Motel>>> getAllMotels(
+    @Operation(summary = "Get all motels with pagination and filtering", 
+               description = "Retrieve paginated list of motels with optional filters")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Motels retrieved successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid parameters")
+    })
+    public ResponseEntity<ApiResponse<PaginatedResponse<MotelResponse>>> getAllMotels(
             @RequestParam(value = "motelID", required = false) String motelIdStr,
             @RequestParam(value = "motelChainID", required = false) String motelChainId,
             @RequestParam(value = "status", required = false) String status,
@@ -31,18 +53,14 @@ public class MotelController {
             @RequestParam(value = "state", required = false) String state,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sort", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "direction", defaultValue = "desc") String sortDirection) {
+            @RequestParam(defaultValue = "motelName") String sort,
+            @RequestParam(defaultValue = "asc") String direction) {
         
-        // Validate pagination parameters
-        if (page < 0) {
-            ApiResponse<PaginatedResponse<Motel>> errorResponse = new ApiResponse<>("400", null, "Page number cannot be negative");
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        if (size <= 0 || size > 100) {
-            ApiResponse<PaginatedResponse<Motel>> errorResponse = new ApiResponse<>("400", null, "Page size must be between 1 and 100");
-            return ResponseEntity.badRequest().body(errorResponse);
+        // Validate sort field
+        if (!ALLOWED_SORT_FIELDS.contains(sort)) {
+            return ResponseEntity.badRequest().body(
+                new ApiResponse<>("400", null, "Invalid sort field. Allowed fields: " + ALLOWED_SORT_FIELDS)
+            );
         }
         
         // Convert motelID string to UUID if provided
@@ -51,34 +69,18 @@ public class MotelController {
             try {
                 motelId = UUID.fromString(motelIdStr);
             } catch (IllegalArgumentException e) {
-                // If UUID is invalid, return bad request
-                ApiResponse<PaginatedResponse<Motel>> errorResponse = new ApiResponse<>("400", null, "Invalid motelID format");
-                return ResponseEntity.badRequest().body(errorResponse);
+                return ResponseEntity.badRequest().body(
+                    new ApiResponse<>("400", null, "Invalid motelID format")
+                );
             }
         }
         
-        // Create sort object
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
+        Sort.Direction dir = direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, sort));
         
-        // Create pageable object
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Motel> motelPage = motelService.getMotelsWithFilters(motelId, motelChainId, status, pincode, state, pageable);
         
-        // Check if we need to apply filters
-        boolean hasFilters = motelId != null || motelChainId != null || status != null || pincode != null || state != null;
-        
-        Page<Motel> motelPage;
-        if (hasFilters) {
-            // For filtered results, use the paginated filter method
-            // Note: This currently returns paginated results without applying filters to the pagination
-            // In production, you'd want to implement proper filtered pagination in the repository
-            motelPage = motelService.getMotelsWithFilters(motelId, motelChainId, status, pincode, state, pageable);
-        } else {
-            // No filters, return paginated results
-            motelPage = motelService.getAllMotels(pageable);
-        }
-        
-        // Create pagination info
+        List<MotelResponse> responses = motelMapper.toResponseList(motelPage.getContent());
         PaginatedResponse.PaginationInfo paginationInfo = new PaginatedResponse.PaginationInfo(
             motelPage.getNumber(),
             motelPage.getSize(),
@@ -87,85 +89,63 @@ public class MotelController {
             motelPage.isFirst(),
             motelPage.isLast()
         );
+        PaginatedResponse<MotelResponse> paginatedResponse = new PaginatedResponse<>(responses, paginationInfo);
         
-        // Create paginated response
-        PaginatedResponse<Motel> paginatedResponse = new PaginatedResponse<>(
-            motelPage.getContent(),
-            paginationInfo
-        );
-        
-        ApiResponse<PaginatedResponse<Motel>> response = new ApiResponse<>("200", paginatedResponse);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>("200", paginatedResponse, "Motels retrieved successfully"));
     }
 
     @GetMapping("/{motelId}")
-    public ResponseEntity<ApiResponse<Motel>> getMotelById(@PathVariable UUID motelId) {
-        Optional<Motel> motel = motelService.getMotelById(motelId);
-        if (motel.isPresent()) {
-            ApiResponse<Motel> response = new ApiResponse<>("200", motel.get());
-            return ResponseEntity.ok(response);
-        } else {
-            ApiResponse<Motel> response = new ApiResponse<>("404", null);
-            return ResponseEntity.status(404).body(response);
-        }
+    @Operation(summary = "Get motel by ID", description = "Retrieve a specific motel by its ID")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Motel found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Motel not found")
+    })
+    public ResponseEntity<ApiResponse<MotelResponse>> getMotelById(@PathVariable UUID motelId) {
+        Motel motel = motelService.getMotelById(motelId);
+        MotelResponse response = motelMapper.toResponse(motel);
+        return ResponseEntity.ok(new ApiResponse<>("200", response, "Motel retrieved successfully"));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Motel>> createMotel(@RequestBody Motel motel) {
-        // Validate that required fields are provided in the payload
-        if (motel.getMotelChainId() == null || motel.getMotelChainId().trim().isEmpty()) {
-            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null, "motelChainId is required and cannot be empty");
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        if (motel.getMotelName() == null || motel.getMotelName().trim().isEmpty()) {
-            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null, "motelName is required and cannot be empty");
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        if (motel.getPincode() == null || motel.getPincode().trim().isEmpty()) {
-            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null, "pincode is required and cannot be empty");
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        if (motel.getState() == null || motel.getState().trim().isEmpty()) {
-            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null, "state is required and cannot be empty");
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        // Check if motel already exists with the same motelChainId, motelName, pincode, and state
-        Optional<Motel> existingMotel = motelService.findByMotelChainIdAndMotelNameAndPincodeAndState(
-            motel.getMotelChainId(), motel.getMotelName(), motel.getPincode(), motel.getState());
-        
-        if (existingMotel.isPresent()) {
-            // Return existing motel with 201 code
-            ApiResponse<Motel> response = new ApiResponse<>("201", existingMotel.get(), "Motel already exists");
-            return ResponseEntity.status(201).body(response);
-        }
-        
+    @Operation(summary = "Create a new motel", description = "Create a new motel with validation")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Motel created successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid input"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Motel already exists")
+    })
+    public ResponseEntity<ApiResponse<MotelResponse>> createMotel(@Valid @RequestBody CreateMotelRequest request) {
+        Motel motel = motelMapper.toEntity(request);
         Motel createdMotel = motelService.createMotel(motel);
-        ApiResponse<Motel> response = new ApiResponse<>("201", createdMotel, "Motel created successfully");
-        return ResponseEntity.status(201).body(response);
+        MotelResponse response = motelMapper.toResponse(createdMotel);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(new ApiResponse<>("201", response, "Motel created successfully"));
     }
 
     @PutMapping("/{motelId}")
-    public ResponseEntity<ApiResponse<Motel>> updateMotel(@PathVariable UUID motelId, @RequestBody Motel motel) {
-        // Validate that motelChainId is provided in the payload
-        if (motel.getMotelChainId() == null || motel.getMotelChainId().trim().isEmpty()) {
-            ApiResponse<Motel> errorResponse = new ApiResponse<>("400", null);
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        
-        motel.setMotelId(motelId);
-        Motel updatedMotel = motelService.updateMotel(motel);
-        ApiResponse<Motel> response = new ApiResponse<>("200", updatedMotel);
-        return ResponseEntity.ok(response);
+    @Operation(summary = "Update a motel", description = "Update motel details (partial update supported)")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Motel updated successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid input"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Motel not found")
+    })
+    public ResponseEntity<ApiResponse<MotelResponse>> updateMotel(
+            @PathVariable UUID motelId,
+            @Valid @RequestBody UpdateMotelRequest request) {
+        Motel existing = motelService.getMotelById(motelId);
+        motelMapper.updateEntityFromDto(request, existing);
+        Motel updated = motelService.updateMotel(existing);
+        MotelResponse response = motelMapper.toResponse(updated);
+        return ResponseEntity.ok(new ApiResponse<>("200", response, "Motel updated successfully"));
     }
 
     @DeleteMapping("/{motelId}")
-    public ResponseEntity<ApiResponse<String>> deleteMotel(@PathVariable UUID motelId) {
+    @Operation(summary = "Delete a motel", description = "Delete a motel by its ID")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Motel deleted successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Motel not found")
+    })
+    public ResponseEntity<ApiResponse<Void>> deleteMotel(@PathVariable UUID motelId) {
         motelService.deleteMotel(motelId);
-        ApiResponse<String> response = new ApiResponse<>("204", "Motel deleted successfully");
-        return ResponseEntity.status(204).body(response);
+        return ResponseEntity.ok(new ApiResponse<>("200", null, "Motel deleted successfully"));
     }
 }
