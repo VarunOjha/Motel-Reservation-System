@@ -47,3 +47,7 @@ Thumbs.db
 
 # .DS_Store files in all directories
 **/.DS_Store
+
+### Application Logs ###
+logs/
+*.log
