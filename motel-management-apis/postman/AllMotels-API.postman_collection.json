@@ -1,0 +1,280 @@
+{
+	"info": {
+		"_postman_id": "allmotels-api-tests",
+		"name": "AllMotels API - Complete Test Suite",
+		"description": "Comprehensive tests for AllMotels read-only API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "✅ 1. Get All Motels (Default Pagination)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200 OK', function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test('Response has ApiResponse structure', function() {",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"    pm.expect(jsonData).to.have.property('message');",
+							"    pm.expect(jsonData).to.have.property('timestamp');",
+							"    pm.expect(jsonData).to.have.property('correlationId');",
+							"});",
+							"",
+							"pm.test('Response contains paginated data', function() {",
+							"    pm.expect(jsonData.data).to.have.property('content');",
+							"    pm.expect(jsonData.data).to.have.property('pagination');",
+							"    pm.expect(jsonData.data.content).to.be.an('array');",
+							"});",
+							"",
+							"pm.test('Pagination info is correct', function() {",
+							"    pm.expect(jsonData.data.pagination.page).to.equal(0);",
+							"    pm.expect(jsonData.data.pagination.size).to.be.at.least(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/allMotels",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "allMotels"]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 2. Get All Motels (Custom Pagination)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200 OK', function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test('Pagination matches request', function() {",
+							"    pm.expect(jsonData.data.pagination.page).to.equal(0);",
+							"    pm.expect(jsonData.data.pagination.size).to.be.at.most(5);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/allMotels?page=0&size=5",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "allMotels"],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 3. Negative Page Number",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400 Bad Request', function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test('Error message is correct', function() {",
+							"    pm.expect(jsonData.message).to.include('Page number cannot be negative');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/allMotels?page=-1&size=10",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "allMotels"],
+					"query": [
+						{
+							"key": "page",
+							"value": "-1"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 4. Invalid Page Size (Zero)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400 Bad Request', function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test('Error message is correct', function() {",
+							"    pm.expect(jsonData.message).to.include('Page size must be between 1 and 100');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/allMotels?page=0&size=0",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "allMotels"],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 5. Invalid Page Size (Too Large)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400 Bad Request', function() {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test('Error message is correct', function() {",
+							"    pm.expect(jsonData.message).to.include('Page size must be between 1 and 100');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/allMotels?page=0&size=101",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "allMotels"],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "101"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 6. Get Entity Count Statistics",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200 OK', function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const jsonData = pm.response.json();",
+							"",
+							"pm.test('Response has count data', function() {",
+							"    pm.expect(jsonData.data).to.have.property('postgresqlTables');",
+							"    pm.expect(jsonData.data).to.have.property('totalPostgresqlRecords');",
+							"    pm.expect(jsonData.data).to.have.property('note');",
+							"});",
+							"",
+							"pm.test('PostgreSQL tables count exists', function() {",
+							"    pm.expect(jsonData.data.postgresqlTables).to.have.property('motel_chains');",
+							"    pm.expect(jsonData.data.postgresqlTables).to.have.property('motels');",
+							"    pm.expect(jsonData.data.postgresqlTables).to.have.property('room_categories');",
+							"    pm.expect(jsonData.data.postgresqlTables).to.have.property('rooms');",
+							"});",
+							"",
+							"pm.test('Total count is sum of all tables', function() {",
+							"    const tables = jsonData.data.postgresqlTables;",
+							"    const expectedTotal = tables.motel_chains + tables.motels + tables.room_categories + tables.rooms;",
+							"    pm.expect(jsonData.data.totalPostgresqlRecords).to.equal(expectedTotal);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/allMotels/count",
+					"host": ["{{baseUrl}}"],
+					"path": ["motelApi", "v1", "allMotels", "count"]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8085",
+			"type": "string"
+		}
+	]
+}
