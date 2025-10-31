@@ -18,6 +18,10 @@ public interface MotelMapper {
     /**
      * Convert CreateMotelRequest DTO to Motel entity.
      */
+    @Mapping(target = "motelId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
     Motel toEntity(CreateMotelRequest request);
 
     /**
@@ -25,6 +29,11 @@ public interface MotelMapper {
      * Only non-null fields from the DTO will be mapped (partial update).
      */
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "motelChainId", ignore = true)
+    @Mapping(target = "motelId", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
     void updateEntityFromDto(UpdateMotelRequest request, @MappingTarget Motel motel);
 
     /**

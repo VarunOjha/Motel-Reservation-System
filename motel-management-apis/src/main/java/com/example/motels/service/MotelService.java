@@ -81,7 +81,7 @@ public class MotelService {
     }
 
     public void deleteMotel(UUID motelId) {
-        Motel motel = getMotelById(motelId); // Throws if not found
+        getMotelById(motelId); // Verify motel exists (throws if not found)
         motelRepository.deleteById(motelId);
     }
 }
