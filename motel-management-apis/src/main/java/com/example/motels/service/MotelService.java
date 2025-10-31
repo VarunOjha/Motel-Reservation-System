@@ -1,8 +1,10 @@
 package com.example.motels.service;
 
+import com.example.motels.exception.DuplicateResourceException;
+import com.example.motels.exception.ResourceNotFoundException;
 import com.example.motels.model.Motel;
 import com.example.motels.repository.MotelRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,10 +14,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class MotelService {
 
-    @Autowired
-    private MotelRepository motelRepository;
+    private final MotelRepository motelRepository;
 
     public List<Motel> getAllMotels() {
         return motelRepository.findAll();
@@ -48,8 +50,9 @@ public class MotelService {
         return motelRepository.findAll(pageable);
     }
 
-    public Optional<Motel> getMotelById(UUID motelId) {
-        return motelRepository.findById(motelId);
+    public Motel getMotelById(UUID motelId) {
+        return motelRepository.findById(motelId)
+            .orElseThrow(() -> new ResourceNotFoundException("Motel", "id", motelId.toString()));
     }
 
     public Optional<Motel> findByMotelChainIdAndMotelNameAndPincodeAndState(
@@ -59,14 +62,26 @@ public class MotelService {
     }
 
     public Motel createMotel(Motel motel) {
+        // Check for duplicate motel (same chain, name, pincode, state)
+        Optional<Motel> existing = motelRepository.findByMotelChainIdAndMotelNameAndPincodeAndState(
+            motel.getMotelChainId(), motel.getMotelName(), motel.getPincode(), motel.getState());
+        
+        if (existing.isPresent()) {
+            throw new DuplicateResourceException("Motel", 
+                "motel '" + motel.getMotelName() + "' already exists in " + motel.getState() + " with pincode " + motel.getPincode());
+        }
+        
         return motelRepository.save(motel);
     }
 
     public Motel updateMotel(Motel motel) {
+        // Verify motel exists
+        getMotelById(motel.getMotelId());
         return motelRepository.save(motel);
     }
 
     public void deleteMotel(UUID motelId) {
+        Motel motel = getMotelById(motelId); // Throws if not found
         motelRepository.deleteById(motelId);
     }
 }
