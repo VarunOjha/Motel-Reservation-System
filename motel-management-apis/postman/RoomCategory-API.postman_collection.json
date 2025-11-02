@@ -1,0 +1,719 @@
+{
+	"info": {
+		"_postman_id": "roomcategory-api-tests",
+		"name": "RoomCategory API - Complete Test Suite",
+		"description": "Comprehensive test suite for RoomCategory API with DTOs, validation, and Swagger",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "✅ 1. Create RoomCategory (Valid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"// Test 2: Response structure",
+							"pm.test(\"Response has ApiResponse structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('correlationId');",
+							"    pm.expect(jsonData).to.have.property('timestamp');",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"    pm.expect(jsonData).to.have.property('message');",
+							"});",
+							"",
+							"// Test 3: DTO validation",
+							"pm.test(\"Response contains RoomCategoryResponse DTO\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.data) {",
+							"        pm.expect(jsonData.data).to.have.property('motelRoomCategoryId');",
+							"        pm.expect(jsonData.data).to.have.property('roomCategoryName');",
+							"        pm.expect(jsonData.data).to.have.property('motelChainId');",
+							"        pm.expect(jsonData.data).to.have.property('motelId');",
+							"        pm.expect(jsonData.data).to.have.property('status');",
+							"        pm.expect(jsonData.data).to.have.property('createdAt');",
+							"        pm.expect(jsonData.data).to.have.property('updatedAt');",
+							"        pm.expect(jsonData.data).to.not.have.property('deletedAt');",
+							"    }",
+							"});",
+							"",
+							"// Test 4: Correlation ID exists",
+							"pm.test(\"Correlation ID is present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.correlationId).to.be.a('string');",
+							"    pm.expect(jsonData.correlationId).to.have.lengthOf.above(0);",
+							"});",
+							"",
+							"// Test 5: Success message",
+							"pm.test(\"Success message is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.equal('Room category created successfully');",
+							"});",
+							"",
+							"// Save ID for later tests",
+							"if (pm.response.code === 201) {",
+							"    try {",
+							"        var jsonData = pm.response.json();",
+							"        if (jsonData.data && jsonData.data.motelRoomCategoryId) {",
+							"            pm.collectionVariables.set(\"roomCategoryId\", jsonData.data.motelRoomCategoryId);",
+							"            console.log(\"✅ Saved roomCategoryId: \" + jsonData.data.motelRoomCategoryId);",
+							"        }",
+							"    } catch(e) {",
+							"        console.log(\"❌ Error saving ID: \" + e);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelId\": \"{{motelId}}\",\n  \"roomCategoryName\": \"Deluxe Suite\",\n  \"displayName\": \"Deluxe Suite - Ocean View\",\n  \"description\": \"Luxury room with stunning ocean views and premium amenities\",\n  \"status\": \"ACTIVE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 2. Get RoomCategory by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Response structure",
+							"pm.test(\"Response has correct structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"    pm.expect(jsonData.data).to.have.property('motelRoomCategoryId');",
+							"});",
+							"",
+							"// Test 3: Data matches created category",
+							"pm.test(\"Category data is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.roomCategoryName).to.equal('Deluxe Suite');",
+							"    pm.expect(jsonData.data.status).to.equal('ACTIVE');",
+							"});",
+							"",
+							"// Test 4: Timestamps exist",
+							"pm.test(\"Timestamps are present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.createdAt).to.be.a('string');",
+							"    pm.expect(jsonData.data.updatedAt).to.be.a('string');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories/{{roomCategoryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories",
+						"{{roomCategoryId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 3. Get All RoomCategories (Paginated)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Pagination structure",
+							"pm.test(\"Response has pagination structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('content');",
+							"    pm.expect(jsonData.data).to.have.property('pagination');",
+							"    pm.expect(jsonData.data.content).to.be.an('array');",
+							"});",
+							"",
+							"// Test 3: Pagination info",
+							"pm.test(\"Pagination info is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var pagination = jsonData.data.pagination;",
+							"    pm.expect(pagination).to.have.property('page');",
+							"    pm.expect(pagination).to.have.property('size');",
+							"    pm.expect(pagination).to.have.property('total_elements');",
+							"    pm.expect(pagination).to.have.property('total_pages');",
+							"    pm.expect(pagination.page).to.equal(0);",
+							"    pm.expect(pagination.size).to.equal(10);",
+							"});",
+							"",
+							"// Test 4: Content has items",
+							"pm.test(\"Content array has at least 1 item\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.content.length).to.be.above(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories?page=0&size=10&sort=roomCategoryName&direction=asc",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						},
+						{
+							"key": "sort",
+							"value": "roomCategoryName"
+						},
+						{
+							"key": "direction",
+							"value": "asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 4. Update RoomCategory (Partial)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Updated fields changed",
+							"pm.test(\"Description was updated\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.description).to.include('Updated');",
+							"});",
+							"",
+							"pm.test(\"Status was updated to INACTIVE\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.status).to.equal('INACTIVE');",
+							"});",
+							"",
+							"// Test 3: Unchanged fields preserved",
+							"pm.test(\"Room category name unchanged\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.roomCategoryName).to.equal('Deluxe Suite');",
+							"});",
+							"",
+							"// Test 4: updatedAt changed, createdAt same",
+							"pm.test(\"updatedAt timestamp changed\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data.updatedAt).to.not.equal(jsonData.data.createdAt);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"description\": \"Updated: Premium luxury suite with ocean views, breakfast included\",\n  \"status\": \"INACTIVE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories/{{roomCategoryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories",
+						"{{roomCategoryId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 5. Validation Error - Blank Name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"// Test 2: Error structure",
+							"pm.test(\"Response has error structure\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('status');",
+							"    pm.expect(jsonData).to.have.property('message');",
+							"    pm.expect(jsonData.message).to.equal('Validation failed');",
+							"});",
+							"",
+							"// Test 3: Validation errors in data",
+							"pm.test(\"Validation errors present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('roomCategoryName');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelId\": \"{{motelId}}\",\n  \"roomCategoryName\": \"\",\n  \"status\": \"ACTIVE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 6. Validation Error - Invalid Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"// Test 2: Status validation error",
+							"pm.test(\"Status validation error present\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.have.property('status');",
+							"    pm.expect(jsonData.data.status).to.include('ACTIVE or INACTIVE');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelId\": \"{{motelId}}\",\n  \"roomCategoryName\": \"Test Suite\",\n  \"status\": \"INVALID_STATUS\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 7. Duplicate Name Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"// Test 2: Duplicate error message",
+							"pm.test(\"Duplicate error message is clear\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('already exists');",
+							"    pm.expect(jsonData.message).to.include('Deluxe Suite');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"motelChainId\": \"{{motelChainId}}\",\n  \"motelId\": \"{{motelId}}\",\n  \"roomCategoryName\": \"Deluxe Suite\",\n  \"displayName\": \"Different Display Name\",\n  \"description\": \"Trying to create duplicate\",\n  \"status\": \"ACTIVE\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 8. Invalid Sort Field",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 400 Bad Request\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"// Test 2: Error message shows allowed fields",
+							"pm.test(\"Error message lists allowed fields\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('Invalid sort field');",
+							"    pm.expect(jsonData.message).to.include('Allowed fields');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories?sort=invalidField",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "invalidField"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 9. Custom Correlation ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Custom correlation ID returned",
+							"pm.test(\"Custom correlation ID is returned\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.correlationId).to.equal('my-custom-test-id-12345');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Correlation-ID",
+						"value": "my-custom-test-id-12345",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories?page=0&size=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 10. Not Found Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"// Test 2: Error message",
+							"pm.test(\"Error message is clear\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('not found');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✅ 11. Delete RoomCategory",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Test 2: Success message",
+							"pm.test(\"Success message is correct\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.equal('Room category deleted successfully');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories/{{roomCategoryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories",
+						"{{roomCategoryId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ 12. Verify Deleted (404)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test 1: Status code",
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"// Test 2: Error message",
+							"pm.test(\"Category not found after delete\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.include('not found');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/motelApi/v1/motelRoomCategories/{{roomCategoryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"motelApi",
+						"v1",
+						"motelRoomCategories",
+						"{{roomCategoryId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8085",
+			"type": "string"
+		},
+		{
+			"key": "motelChainId",
+			"value": "f22bdf78-4713-4292-ac50-a2be85155115",
+			"type": "string"
+		},
+		{
+			"key": "motelId",
+			"value": "00000000-0000-0000-0000-000000000001",
+			"type": "string"
+		},
+		{
+			"key": "roomCategoryId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

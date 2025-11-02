@@ -1,5 +1,7 @@
 package com.example.motels.service;
 
+import com.example.motels.exception.DuplicateResourceException;
+import com.example.motels.exception.ResourceNotFoundException;
 import com.example.motels.model.RoomCategory;
 import com.example.motels.repository.RoomCategoryRepository;
 
@@ -78,8 +80,9 @@ public class RoomCategoryService {
         return roomCategoryRepository.findAll(pageable);
     }
 
-    public Optional<RoomCategory> getRoomCategoryById(UUID roomCategoryId) {
-        return roomCategoryRepository.findById(roomCategoryId);
+    public RoomCategory getRoomCategoryById(UUID roomCategoryId) {
+        return roomCategoryRepository.findById(roomCategoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("RoomCategory", "id", roomCategoryId));
     }
 
     public Optional<RoomCategory> getRoomCategoryById(UUID motelChainId, UUID motelId, UUID roomCategoryId) {
@@ -88,9 +91,16 @@ public class RoomCategoryService {
 
     public RoomCategory createRoomCategory(RoomCategory roomCategory) {
         String roomCategoryName = roomCategory.getRoomCategoryName();
-        if (roomCategoryRepository.existsByRoomCategoryNameAndMotelChainIdAndMotelId(roomCategoryName, roomCategory.getMotelChainId(), roomCategory.getMotelId())) {
-            return roomCategoryRepository.findByRoomCategoryNameAndMotelChainIdAndMotelId(roomCategoryName, roomCategory.getMotelChainId(), roomCategory.getMotelId());
+        UUID motelChainId = roomCategory.getMotelChainId();
+        UUID motelId = roomCategory.getMotelId();
+        
+        // Check for duplicate category name within same motel
+        if (roomCategoryRepository.existsByRoomCategoryNameAndMotelChainIdAndMotelId(
+                roomCategoryName, motelChainId, motelId)) {
+            throw new DuplicateResourceException("RoomCategory", 
+                "category name '" + roomCategoryName + "' for motel " + motelId);
         }
+        
         return roomCategoryRepository.save(roomCategory);
     }
 
@@ -105,11 +115,20 @@ public class RoomCategoryService {
     }
 
     public RoomCategory updateRoomCategory(UUID roomCategoryId, RoomCategory roomCategory) {
-        if (roomCategoryRepository.existsByMotelRoomCategoryIdAndMotelChainIdAndMotelId(roomCategoryId, roomCategory.getMotelChainId(), roomCategory.getMotelId())) {
-            roomCategory.setMotelRoomCategoryId(roomCategoryId);
-            return roomCategoryRepository.save(roomCategory);
+        RoomCategory existing = getRoomCategoryById(roomCategoryId);
+        
+        // Check for duplicate name if name is being changed
+        String newName = roomCategory.getRoomCategoryName();
+        if (newName != null && !newName.equals(existing.getRoomCategoryName())) {
+            if (roomCategoryRepository.existsByRoomCategoryNameAndMotelChainIdAndMotelId(
+                    newName, existing.getMotelChainId(), existing.getMotelId())) {
+                throw new DuplicateResourceException("RoomCategory", 
+                    "category name '" + newName + "' already exists for this motel");
+            }
         }
-        return null;
+        
+        roomCategory.setMotelRoomCategoryId(roomCategoryId);
+        return roomCategoryRepository.save(roomCategory);
     }
 
     public RoomCategory updateRoomCategory(UUID motelChainId, UUID motelId, UUID roomCategoryId, RoomCategory roomCategory) {
@@ -122,11 +141,10 @@ public class RoomCategoryService {
         return null;
     }
 
-    public boolean deleteRoomCategory(UUID motelChainId, UUID motelId, UUID roomCategoryId) {
-        if (roomCategoryRepository.existsByMotelRoomCategoryIdAndMotelChainIdAndMotelId(roomCategoryId, motelChainId, motelId)) {
-            roomCategoryRepository.deleteById(roomCategoryId);
-            return true;
+    public void deleteRoomCategory(UUID roomCategoryId) {
+        if (!roomCategoryRepository.existsById(roomCategoryId)) {
+            throw new ResourceNotFoundException("RoomCategory", "id", roomCategoryId);
         }
-        return false;
+        roomCategoryRepository.deleteById(roomCategoryId);
     }
 }
