@@ -4,6 +4,8 @@
 
 ![Architecture Diagram](design-docs/doc-images/architecture.png)
 
+![Quick Overview](design-docs/doc-images/overview.svg)
+
 ---
 
 ## 🚀 Project Overview
