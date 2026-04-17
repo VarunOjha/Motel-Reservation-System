@@ -3,7 +3,7 @@ set -e
 
 echo "Checking PostgreSQL availability at postgres:5432..."
 
-until pg_isready -h postgres -p 5432 -U moteluser; do
+until pg_isready -h postgres -p 5432 -U <POSTGRES_USER>; do
   echo "Waiting for Postgres..."
   sleep 2
 done

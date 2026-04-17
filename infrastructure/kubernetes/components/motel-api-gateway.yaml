@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: motel-api-gateway
-          image: 520320208231.dkr.ecr.us-west-2.amazonaws.com/motel-api-gateway:latest
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.us-west-2.amazonaws.com/motel-api-gateway:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

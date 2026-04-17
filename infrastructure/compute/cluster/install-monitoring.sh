@@ -71,7 +71,7 @@ echo "Namespace                : ${NAMESPACE}"
 if [[ -n "${GRAFANA_HOST:-}" ]]; then
   echo "Grafana URL              : http://${GRAFANA_HOST}"
   echo "Grafana admin user       : admin"
-  echo "Grafana admin password   : ${GRAFANA_PASS}"
+  echo "Grafana admin password   : (stored in k8s secret '${RELEASE_NAME}-grafana')"
   echo "Note: ELB may take a few more minutes to be reachable."
 else
   echo "Grafana Service          : ${GRAFANA_SVC}"
@@ -79,7 +79,7 @@ else
   echo "You can port-forward meanwhile:"
   echo "kubectl -n ${NAMESPACE} port-forward svc/${GRAFANA_SVC} 3000:80"
   echo "Then open: http://localhost:3000"
-  echo "Grafana admin password   : ${GRAFANA_PASS}"
+  echo "Grafana admin password   : (stored in k8s secret '${RELEASE_NAME}-grafana')"
 fi
 echo "=========================================================="
 echo

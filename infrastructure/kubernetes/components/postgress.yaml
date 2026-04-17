@@ -75,9 +75,9 @@ spec:
             - name: POSTGRES_DB
               value: moteldb
             - name: POSTGRES_USER
-              value: moteluser
+              value: <POSTGRES_USER>
             - name: POSTGRES_PASSWORD
-              value: motelpass
+              value: <POSTGRES_PASSWORD>
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           volumeMounts:
@@ -85,12 +85,12 @@ spec:
               mountPath: /var/lib/postgresql/data/pgdata
           livenessProbe:
             exec:
-              command: ["pg_isready", "-U", "moteluser"]
+              command: ["pg_isready", "-U", "<POSTGRES_USER>"]
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "moteluser"]
+              command: ["pg_isready", "-U", "<POSTGRES_USER>"]
             initialDelaySeconds: 10
             periodSeconds: 5
           resources:

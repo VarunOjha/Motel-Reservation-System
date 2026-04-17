@@ -5,8 +5,8 @@ services:
     image: postgres:15-alpine
     container_name: motel-postgres
     environment:
-      POSTGRES_USER: moteluser
-      POSTGRES_PASSWORD: motelpass
+      POSTGRES_USER: <POSTGRES_USER>
+      POSTGRES_PASSWORD: <POSTGRES_PASSWORD>
       POSTGRES_DB: moteldb
     ports:
       - "5432:5432"
@@ -26,8 +26,8 @@ services:
       - "8085:8085"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/moteldb
-      SPRING_DATASOURCE_USERNAME: moteluser
-      SPRING_DATASOURCE_PASSWORD: motelpass
+      SPRING_DATASOURCE_USERNAME: <POSTGRES_USER>
+      SPRING_DATASOURCE_PASSWORD: <POSTGRES_PASSWORD>
     networks:
       - motel-network
 

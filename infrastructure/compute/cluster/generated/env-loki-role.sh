@@ -1,1 +1,1 @@
-export LOKI_ROLE_ARN='arn:aws:iam::520320208231:role/LokiIRSA-motel-cluster-dev'
+export LOKI_ROLE_ARN='arn:aws:iam::<AWS_ACCOUNT_ID>:role/LokiIRSA-motel-cluster-dev'
